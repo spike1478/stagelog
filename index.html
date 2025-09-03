@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StageLog - Theatre Performance Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Drive API -->
+    <script src="https://apis.google.com/js/api.js"></script>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <nav class="navbar" role="navigation" aria-label="Primary">
+        <div class="nav-container">
+            <h1 class="nav-title">
+                <i class="fas fa-theater-masks"></i>
+                StageLog
+            </h1>
+            <div class="nav-links">
+                <button class="nav-btn active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    Performance Overview
+                </button>
+                <button class="nav-btn" data-page="add-performance">
+                    <i class="fas fa-plus"></i>
+                    Add Performance
+                </button>
+                <button class="nav-btn" data-page="my-shows">
+                    <i class="fas fa-list"></i>
+                    My Shows
+                </button>
+                <button class="nav-btn" data-page="analytics">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+                </button>
+                <button class="nav-btn" data-page="access-schemes">
+                    <i class="fas fa-universal-access"></i>
+                    Access Schemes
+                </button>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode" aria-label="Toggle theme">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main id="main-content" class="main-content" role="main">
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <div class="page-header">
+                <h2>Performance Overview</h2>
+                <div class="filters">
+                    <input type="text" id="search-filter" placeholder="Search shows, theatres, cities...">
+                    <select id="sort-filter">
+                        <option value="date-desc">Date (Newest First)</option>
+                        <option value="date-asc">Date (Oldest First)</option>
+                        <option value="rating-desc">Rating (Highest First)</option>
+                        <option value="rating-asc">Rating (Lowest First)</option>
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                    </select>
+                    <select id="city-filter">
+                        <option value="">All Cities</option>
+                    </select>
+                    <select id="expense-filter">
+                        <option value="">All Performances</option>
+                        <option value="with-expenses">With Expense Data</option>
+                        <option value="missing-expenses">Missing Expense Data</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Quick Stats Overview -->
+            <div class="quick-stats-overview">
+                <div class="quick-stat-card">
+                    <div class="quick-stat-icon">
+                        <i class="fas fa-theater-masks"></i>
+                    </div>
+                    <div class="quick-stat-content">
+                        <div class="quick-stat-number" id="total-performances">0</div>
+                        <div class="quick-stat-label">Total Shows</div>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="quick-stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="quick-stat-content">
+                        <div class="quick-stat-number" id="average-rating">0.00</div>
+                        <div class="quick-stat-label">Average Rating</div>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="quick-stat-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="quick-stat-content">
+                        <div class="quick-stat-number" id="upcoming-shows">0</div>
+                        <div class="quick-stat-label">Upcoming Shows</div>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="quick-stat-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="quick-stat-content">
+                        <div class="quick-stat-number" id="favourite-city">-</div>
+                        <div class="quick-stat-label">Favourite City</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="performance-sections">
+                <section class="performance-section">
+                    <h3><i class="fas fa-clock"></i> Upcoming Bookings</h3>
+                    <div id="upcoming-performances" class="performance-list">
+                        <!-- Upcoming performances will be populated here -->
+                    </div>
+                </section>
+
+                <section class="performance-section">
+                    <h3><i class="fas fa-history"></i> Past Performances</h3>
+                    <div id="past-performances" class="performance-list">
+                        <!-- Past performances will be populated here -->
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- My Shows Page -->
+        <div id="my-shows" class="page">
+            <div class="page-header">
+                <h2>My Shows</h2>
+                <p>Complete list of all your theatre performances</p>
+                <div class="filters">
+                    <input type="text" id="my-shows-search-filter" placeholder="Search shows, theatres, cities...">
+                    <select id="my-shows-sort-filter">
+                        <option value="date-desc">Date (Newest First)</option>
+                        <option value="date-asc">Date (Oldest First)</option>
+                        <option value="rating-desc">Rating (Highest First)</option>
+                        <option value="rating-asc">Rating (Lowest First)</option>
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                    </select>
+                    <select id="my-shows-city-filter">
+                        <option value="">All Cities</option>
+                    </select>
+                    <select id="my-shows-expense-filter">
+                        <option value="">All Performances</option>
+                        <option value="with-expenses">With Expense Data</option>
+                        <option value="missing-expenses">Missing Expense Data</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="performance-sections">
+                <section class="performance-section">
+                    <h3><i class="fas fa-list"></i> All Performances</h3>
+                    <div id="my-shows-all-performances" class="performance-list">
+                        <!-- All performances will be populated here -->
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Add Performance Page -->
+        <div id="add-performance" class="page">
+            <div class="page-header">
+                <h2>Add New Performance</h2>
+            </div>
+
+            <form id="performance-form" class="performance-form">
+                <div class="form-section">
+                    <h3>Show Information</h3>
+                    <div class="form-group">
+                        <label for="show-search">Show Title *</label>
+                        <input type="text" id="show-search" placeholder="Search for a show..." required>
+                        <div id="show-suggestions" class="suggestions"></div>
+                    </div>
+                    <div id="show-details" class="show-details hidden">
+                        <!-- Show details will be populated here -->
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Performance Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date-seen">Date Seen *</label>
+                            <input type="date" id="date-seen" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="theatre-name">Theatre Name *</label>
+                            <input type="text" id="theatre-name" placeholder="e.g., Vaudeville Theatre" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" placeholder="e.g., London" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="production-type">Production Type *</label>
+                            <select id="production-type" required>
+                                <option value="">Select...</option>
+                                <option value="West End">West End</option>
+                                <option value="UK Tour">UK Tour</option>
+                                <option value="Broadway">Broadway</option>
+                                <option value="Pro Shot">Pro Shot</option>
+                                <option value="Regional">Regional</option>
+                                <option value="Fringe">Fringe</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Rating</h3>
+                    <div class="rating-grid">
+                        <div class="rating-group">
+                            <label for="music-songs">Music/Songs *</label>
+                            <select id="music-songs" name="music-songs" required>
+                                <option value="">Select rating...</option>
+                                <option value="0.25">0.25</option>
+                                <option value="0.5">0.5</option>
+                                <option value="0.75">0.75</option>
+                                <option value="1">1.0</option>
+                                <option value="1.25">1.25</option>
+                                <option value="1.5">1.5</option>
+                                <option value="1.75">1.75</option>
+                                <option value="2">2.0</option>
+                                <option value="2.25">2.25</option>
+                                <option value="2.5">2.5</option>
+                                <option value="2.75">2.75</option>
+                                <option value="3">3.0</option>
+                                <option value="3.25">3.25</option>
+                                <option value="3.5">3.5</option>
+                                <option value="3.75">3.75</option>
+                                <option value="4">4.0</option>
+                                <option value="4.25">4.25</option>
+                                <option value="4.5">4.5</option>
+                                <option value="4.75">4.75</option>
+                                <option value="5">5.0</option>
+                            </select>
+                        </div>
+                        <div class="rating-group">
+                            <label for="story-plot">Story/Plot *</label>
+                            <select id="story-plot" name="story-plot" required>
+                                <option value="">Select rating...</option>
+                                <option value="0.25">0.25</option>
+                                <option value="0.5">0.5</option>
+                                <option value="0.75">0.75</option>
+                                <option value="1">1.0</option>
+                                <option value="1.25">1.25</option>
+                                <option value="1.5">1.5</option>
+                                <option value="1.75">1.75</option>
+                                <option value="2">2.0</option>
+                                <option value="2.25">2.25</option>
+                                <option value="2.5">2.5</option>
+                                <option value="2.75">2.75</option>
+                                <option value="3">3.0</option>
+                                <option value="3.25">3.25</option>
+                                <option value="3.5">3.5</option>
+                                <option value="3.75">3.75</option>
+                                <option value="4">4.0</option>
+                                <option value="4.25">4.25</option>
+                                <option value="4.5">4.5</option>
+                                <option value="4.75">4.75</option>
+                                <option value="5">5.0</option>
+                            </select>
+                        </div>
+                        <div class="rating-group">
+                            <label for="performance-cast">Performance/Cast *</label>
+                            <select id="performance-cast" name="performance-cast" required>
+                                <option value="">Select rating...</option>
+                                <option value="0.25">0.25 </option>
+                                <option value="0.5">0.5 </option>
+                                <option value="0.75">0.75 </option>
+                                <option value="1">1.0 </option>
+                                <option value="1.25">1.25 </option>
+                                <option value="1.5">1.5 </option>
+                                <option value="1.75">1.75 </option>
+                                <option value="2">2.0 </option>
+                                <option value="2.25">2.25 </option>
+                                <option value="2.5">2.5 </option>
+                                <option value="2.75">2.75 </option>
+                                <option value="3">3.0 </option>
+                                <option value="3.25">3.25 </option>
+                                <option value="3.5">3.5 </option>
+                                <option value="3.75">3.75 </option>
+                                <option value="4">4.0 </option>
+                                <option value="4.25">4.25 </option>
+                                <option value="4.5">4.5 </option>
+                                <option value="4.75">4.75 </option>
+                                <option value="5">5.0 </option>
+                            </select>
+                        </div>
+                        <div class="rating-group">
+                            <label for="stage-visuals">Stage/Visuals *</label>
+                            <select id="stage-visuals" name="stage-visuals" required>
+                                <option value="">Select rating...</option>
+                                <option value="0.25">0.25 </option>
+                                <option value="0.5">0.5 </option>
+                                <option value="0.75">0.75 </option>
+                                <option value="1">1.0 </option>
+                                <option value="1.25">1.25 </option>
+                                <option value="1.5">1.5 </option>
+                                <option value="1.75">1.75 </option>
+                                <option value="2">2.0 </option>
+                                <option value="2.25">2.25 </option>
+                                <option value="2.5">2.5 </option>
+                                <option value="2.75">2.75 </option>
+                                <option value="3">3.0 </option>
+                                <option value="3.25">3.25 </option>
+                                <option value="3.5">3.5 </option>
+                                <option value="3.75">3.75 </option>
+                                <option value="4">4.0 </option>
+                                <option value="4.25">4.25 </option>
+                                <option value="4.5">4.5 </option>
+                                <option value="4.75">4.75 </option>
+                                <option value="5">5.0 </option>
+                            </select>
+                        </div>
+                        <div class="rating-group">
+                            <label for="rewatch-value">Rewatch Value *</label>
+                            <select id="rewatch-value" name="rewatch-value" required>
+                                <option value="">Select rating...</option>
+                                <option value="0.25">0.25 </option>
+                                <option value="0.5">0.5 </option>
+                                <option value="0.75">0.75 </option>
+                                <option value="1">1.0 </option>
+                                <option value="1.25">1.25 </option>
+                                <option value="1.5">1.5 </option>
+                                <option value="1.75">1.75 </option>
+                                <option value="2">2.0 </option>
+                                <option value="2.25">2.25 </option>
+                                <option value="2.5">2.5 </option>
+                                <option value="2.75">2.75 </option>
+                                <option value="3">3.0 </option>
+                                <option value="3.25">3.25 </option>
+                                <option value="3.5">3.5 </option>
+                                <option value="3.75">3.75 </option>
+                                <option value="4">4.0 </option>
+                                <option value="4.25">4.25 </option>
+                                <option value="4.5">4.5 </option>
+                                <option value="4.75">4.75 </option>
+                                <option value="5">5.0 </option>
+                            </select>
+                        </div>
+                        <div class="rating-group" id="theatre-experience-group">
+                            <label for="theatre-experience">Theatre Experience</label>
+                            <select id="theatre-experience" name="theatre-experience">
+                                <option value="">Select rating...</option>
+                                <option value="0.25">0.25 </option>
+                                <option value="0.5">0.5 </option>
+                                <option value="0.75">0.75 </option>
+                                <option value="1">1.0 </option>
+                                <option value="1.25">1.25 </option>
+                                <option value="1.5">1.5 </option>
+                                <option value="1.75">1.75 </option>
+                                <option value="2">2.0 </option>
+                                <option value="2.25">2.25 </option>
+                                <option value="2.5">2.5 </option>
+                                <option value="2.75">2.75 </option>
+                                <option value="3">3.0 </option>
+                                <option value="3.25">3.25 </option>
+                                <option value="3.5">3.5 </option>
+                                <option value="3.75">3.75 </option>
+                                <option value="4">4.0 </option>
+                                <option value="4.25">4.25 </option>
+                                <option value="4.5">4.5 </option>
+                                <option value="4.75">4.75 </option>
+                                <option value="5">5.0 </option>
+                            </select>
+                        </div>
+                        <div class="rating-group" id="programme-group">
+                            <label for="programme">Programme</label>
+                            <select id="programme" name="programme">
+                                <option value="">Select rating...</option>
+                                <option value="0.25">0.25 </option>
+                                <option value="0.5">0.5 </option>
+                                <option value="0.75">0.75 </option>
+                                <option value="1">1.0 </option>
+                                <option value="1.25">1.25 </option>
+                                <option value="1.5">1.5 </option>
+                                <option value="1.75">1.75 </option>
+                                <option value="2">2.0 </option>
+                                <option value="2.25">2.25 </option>
+                                <option value="2.5">2.5 </option>
+                                <option value="2.75">2.75 </option>
+                                <option value="3">3.0 </option>
+                                <option value="3.25">3.25 </option>
+                                <option value="3.5">3.5 </option>
+                                <option value="3.75">3.75 </option>
+                                <option value="4">4.0 </option>
+                                <option value="4.25">4.25 </option>
+                                <option value="4.5">4.5 </option>
+                                <option value="4.75">4.75 </option>
+                                <option value="5">5.0 </option>
+                            </select>
+                        </div>
+                        <div class="rating-group" id="atmosphere-group">
+                            <label for="atmosphere">Atmosphere</label>
+                            <select id="atmosphere" name="atmosphere">
+                                <option value="">Select rating...</option>
+                                <option value="0.25">0.25 </option>
+                                <option value="0.5">0.5 </option>
+                                <option value="0.75">0.75 </option>
+                                <option value="1">1.0 </option>
+                                <option value="1.25">1.25 </option>
+                                <option value="1.5">1.5 </option>
+                                <option value="1.75">1.75 </option>
+                                <option value="2">2.0 </option>
+                                <option value="2.25">2.25 </option>
+                                <option value="2.5">2.5 </option>
+                                <option value="2.75">2.75 </option>
+                                <option value="3">3.0 </option>
+                                <option value="3.25">3.25 </option>
+                                <option value="3.5">3.5 </option>
+                                <option value="3.75">3.75 </option>
+                                <option value="4">4.0 </option>
+                                <option value="4.25">4.25 </option>
+                                <option value="4.5">4.5 </option>
+                                <option value="4.75">4.75 </option>
+                                <option value="5">5.0 </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Expense Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ticket-price">Ticket Price</label>
+                            <input type="number" id="ticket-price" step="0.01" min="0" placeholder="e.g., 85.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="currency">Currency</label>
+                            <select id="currency">
+                                <option value="GBP">GBP (£)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="CAD">CAD ($)</option>
+                                <option value="AUD">AUD ($)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="seat-location">Seat Location</label>
+                            <input type="text" id="seat-location" placeholder="e.g., Stalls K12, Dress Circle B8">
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-fee">Booking Fee</label>
+                            <input type="number" id="booking-fee" step="0.01" min="0" placeholder="e.g., 3.50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="travel-cost">Travel Cost</label>
+                            <input type="number" id="travel-cost" step="0.01" min="0" placeholder="e.g., 12.75">
+                        </div>
+                        <div class="form-group">
+                            <label for="other-expenses">Other Expenses</label>
+                            <input type="number" id="other-expenses" step="0.01" min="0" placeholder="e.g., 5.00 (programmes, drinks, etc.)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Notes</h3>
+                    <div class="form-group">
+                        <label for="notes-access">Notes on Access</label>
+                        <textarea id="notes-access" placeholder="e.g., Uses In-Ear, Didn't work"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="general-notes">General Notes</label>
+                        <textarea id="general-notes" placeholder="Any other comments about the performance"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                    <button type="submit" class="btn btn-primary">Save Performance</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Analytics Page -->
+        <div id="analytics" class="page analytics-page">
+            <div class="page-header">
+                <h2>📊 Performance Analytics</h2>
+                <p>Discover deep insights from your theatre journey</p>
+                <div class="analytics-controls">
+                    <button class="btn btn-secondary" onclick="refreshStats()" title="Refresh analytics data">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportStats('json')" title="Export stats as JSON">
+                        <i class="fas fa-download"></i> Export JSON
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportStats('csv')" title="Export performances as CSV">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                </button>
+                </div>
+            </div>
+
+            <div class="analytics-container">
+                <div id="analytics-live" class="sr-only" aria-live="polite"></div>
+                <!-- Overview Stats -->
+                <div class="stats-overview">
+                    <div class="overview-card">
+                        <h3>🎭 Overview</h3>
+                        <div class="overview-stats">
+                            <div class="overview-stat">
+                                <div class="stat-value" id="total-shows">0</div>
+                                <div class="stat-label">Total Shows</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="stat-value" id="total-spent">£0.00</div>
+                                <div class="stat-label">Total Spent</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="stat-value" id="avg-rating">0.0</div>
+                                <div class="stat-label">Avg Rating</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="stat-value" id="shows-per-month">0.0</div>
+                                <div class="stat-label">Shows/Month</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                                    <!-- Key Insights -->
+                    <div class="insights-section">
+                        <h3>💡 Key Insights</h3>
+                        <div id="insights-container" class="insights-grid">
+                            <!-- Insights will be populated here -->
+                        </div>
+                    </div>
+
+                <!-- Achievements -->
+                <div class="achievements-section">
+                    <h3>🏆 Achievements</h3>
+                    <div id="achievements-container" class="achievements-grid">
+                        <!-- Achievements will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Detailed Stats Grid -->
+                <div class="detailed-stats">
+                    <div class="stats-section">
+                        <h3>💰 Spending Analysis</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                                <div class="stat-icon">💸</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="avg-cost">£0.00</div>
+                                    <div class="stat-label">Average Cost</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">📊</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="median-cost">£0.00</div>
+                                    <div class="stat-label">Median Cost</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">💎</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="max-cost">£0.00</div>
+                                    <div class="stat-label">Most Expensive</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🎯</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="min-cost">£0.00</div>
+                                    <div class="stat-label">Least Expensive</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-section">
+                        <h3>🎫 Cost Per Ticket</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">💸</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="avg-cost-per-ticket">£0.00</div>
+                                    <div class="stat-label">Average Cost Per Ticket</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">📊</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="median-cost-per-ticket">£0.00</div>
+                                    <div class="stat-label">Median Cost Per Ticket</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">💎</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="max-cost-per-ticket">£0.00</div>
+                                    <div class="stat-label">Most Expensive Per Ticket</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🎯</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="min-cost-per-ticket">£0.00</div>
+                                    <div class="stat-label">Least Expensive Per Ticket</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-section">
+                        <h3>⭐ Rating Analysis</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">📈</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="rating-avg">0.0</div>
+                                    <div class="stat-label">Average Rating</div>
+                                </div>
+                    </div>
+                    <div class="stat-card">
+                                <div class="stat-icon">📊</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="rating-median">0.0</div>
+                                    <div class="stat-label">Median Rating</div>
+                                </div>
+                    </div>
+                    <div class="stat-card">
+                                <div class="stat-icon">🎯</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="rating-percentage">0%</div>
+                                    <div class="stat-label">Shows Rated</div>
+                                </div>
+                    </div>
+                    <div class="stat-card">
+                                <div class="stat-icon">⭐</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="five-stars">0</div>
+                                    <div class="stat-label">5-Star Shows</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                                            <div class="stats-section">
+                            <h3>🏛️ Venue Analysis</h3>
+                            <div class="venue-stats">
+                                <div class="venue-summary">
+                                    <div class="venue-stat">
+                                        <div class="stat-number" id="total-venues">0</div>
+                                        <div class="stat-label">Unique Venues</div>
+                                    </div>
+                                    <div class="venue-stat">
+                                        <div class="stat-number" id="most-frequent-venue">-</div>
+                                        <div class="stat-label">Most Visited</div>
+                                    </div>
+                                </div>
+                                <div id="top-venues" class="top-venues-list">
+                                    <!-- Top venues will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                                            <div class="stats-section">
+                            <h3>🎪 Show Analysis</h3>
+                            <div class="show-stats">
+                                <div class="show-summary">
+                                    <div class="show-stat">
+                                        <div class="stat-number" id="unique-shows">0</div>
+                                        <div class="stat-label">Unique Shows</div>
+                                    </div>
+                                    <div class="show-stat">
+                                        <div class="stat-number" id="repeat-percentage">0%</div>
+                                        <div class="stat-label">Repeat Shows</div>
+                                    </div>
+                                </div>
+                                <div id="top-shows" class="top-shows-list">
+                                    <!-- Top shows will be populated here -->
+                                </div>
+                            </div>
+                    </div>
+                </div>
+
+                <!-- Year-over-Year Comparison -->
+                <div class="comparison-section">
+                    <h3>📅 Year-over-Year Comparison</h3>
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4>This Year</h4>
+                            <div class="comparison-stats">
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="this-year-shows">0</div>
+                                    <div class="stat-label">Shows</div>
+                                </div>
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="this-year-spent">£0.00</div>
+                                    <div class="stat-label">Spent</div>
+                                </div>
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="this-year-rating">0.0</div>
+                                    <div class="stat-label">Avg Rating</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>Last Year</h4>
+                            <div class="comparison-stats">
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="last-year-shows">0</div>
+                                    <div class="stat-label">Shows</div>
+                                </div>
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="last-year-spent">£0.00</div>
+                                    <div class="stat-label">Spent</div>
+                                </div>
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="last-year-rating">0.0</div>
+                                    <div class="stat-label">Avg Rating</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>Change</h4>
+                            <div class="comparison-stats">
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="shows-change">0%</div>
+                                    <div class="stat-label">Shows</div>
+                                </div>
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="spending-change">0%</div>
+                                    <div class="stat-label">Spending</div>
+                                </div>
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="rating-change">0%</div>
+                                    <div class="stat-label">Rating</div>
+                                </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                                    <!-- Rating Distribution -->
+                    <div class="rating-distribution">
+                        <h3>📊 Rating Distribution</h3>
+                        <div id="rating-distribution" class="rating-bars">
+                            <!-- Rating distribution will be populated here -->
+                        </div>
+                    </div>
+
+                                    <!-- Price Range Analysis -->
+                    <div class="price-analysis">
+                        <h3>💷 Price Range Analysis</h3>
+                        <div id="price-ranges" class="price-ranges-grid">
+                            <!-- Price ranges will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Access Schemes Page -->
+        <div id="access-schemes" class="page" role="region" aria-labelledby="access-heading">
+            <div class="page-header">
+                <h2 id="access-heading">Theatre Access Schemes</h2>
+                <div class="debug-shortcut-hint-main">Press <kbd>Ctrl+Shift+D</kbd> for debug tools</div>
+                <div class="access-filters">
+                    <input type="text" id="venue-search" placeholder="Search venues...">
+                    <select id="location-filter">
+                        <option value="">All Locations</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="refreshAccessData()">
+                        <i class="fas fa-refresh"></i> Refresh Data
+                    </button>
+                    <button class="btn btn-primary" onclick="exportToDrive()" title="Export data for Google Drive backup">
+                        <i class="fas fa-cloud-upload-alt"></i> Export to Drive
+                    </button>
+                    <button class="btn btn-secondary" onclick="showDriveRestoreModal()" title="Restore data from Google Drive">
+                        <i class="fas fa-cloud-download-alt"></i> Restore from Drive
+                    </button>
+                    <button class="btn btn-secondary" onclick="showImportModal()" title="Import data from JSON file">
+                        <i class="fas fa-file-import"></i> Import JSON
+                    </button>
+                </div>
+            </div>
+
+            <div id="access-schemes-list" class="access-schemes-list">
+                <!-- Access schemes will be populated here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Performance Detail Modal -->
+    <div id="performance-modal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Performance Details</h2>
+                <span class="modal-close" onclick="closePerformanceModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="api.js"></script>
+    <script src="csv-import.js"></script>
+    <script src="import-performances.js"></script>
+    <script src="musical-database.js"></script>
+    <script src="google-drive-api.js"></script>
+    <script src="debug-system.js"></script>
+    <script src="stats-system.js"></script>
+    <script src="analytics-functions.js"></script>
+    <script src="app-fixed.js"></script>
+    <script src="init-code.js"></script>
+</body>
+</html>

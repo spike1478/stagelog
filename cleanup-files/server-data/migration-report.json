@@ -1,0 +1,11 @@
+{
+  "migrationDate": "2025-08-30T11:03:00.529Z",
+  "summary": [
+    "Found 16 shows",
+    "Found 23 performances",
+    "Found 50 access schemes"
+  ],
+  "showsCount": 16,
+  "performancesCount": 23,
+  "accessSchemesCount": 50
+}

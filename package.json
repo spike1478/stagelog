@@ -1,0 +1,76 @@
+{
+  "name": "stagelog",
+  "version": "2.5.0",
+  "description": "A comprehensive web application for tracking theatre performances, ratings, expenses, and analytics",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . -l 3000",
+    "build": "echo 'No build process needed - pure HTML/CSS/JS'",
+    "test": "echo 'No tests specified'",
+    "lint": "echo 'No linter configured'",
+    "serve": "python -m http.server 8000"
+  },
+  "keywords": [
+    "theatre",
+    "theater",
+    "performance",
+    "tracking",
+    "analytics",
+    "expenses",
+    "ratings",
+    "accessibility",
+    "privacy",
+    "local-storage",
+    "vanilla-js",
+    "no-framework"
+  ],
+  "author": {
+    "name": "StageLog Development Team",
+    "email": "contact@stagelog.app",
+    "url": "https://github.com/yourusername/stagelog"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/stagelog#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/stagelog.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/stagelog/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "files": [
+    "index.html",
+    "styles.css",
+    "app-fixed.js",
+    "stats-system.js",
+    "analytics-functions.js",
+    "debug-system.js",
+    "init-code.js",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md",
+    "AI-DECLARATION.md"
+  ],
+  "devDependencies": {
+    "serve": "^14.2.0"
+  },
+  "peerDependencies": {},
+  "dependencies": {},
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/yourusername"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
+}
