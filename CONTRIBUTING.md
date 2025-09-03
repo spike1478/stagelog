@@ -27,7 +27,7 @@ We welcome feature suggestions! Please:
 1. **Fork the repository**
 2. **Clone your fork**:
    ```bash
-   git clone https://github.com/yourusername/stagelog.git
+   git clone https://github.com/spike1478/stagelog.git
    cd stagelog
    ```
 
@@ -173,11 +173,77 @@ All contributions must maintain WCAG 2.2 AA compliance:
 - Use appropriate language and tone
 - Respect others' time and effort
 
+## 🤖 AI-Assisted Development
+
+**AI assistance is not only allowed but encouraged!** We believe AI tools can help create better, more accessible software when used responsibly.
+
+### AI Development Guidelines
+
+#### ✅ **What's Encouraged**
+- **Code Generation**: Use AI to help write functions, components, and features
+- **Bug Fixing**: Leverage AI to identify and resolve issues
+- **Documentation**: Use AI to improve code comments and documentation
+- **Testing**: Generate test cases and validation logic
+- **Accessibility**: Use AI to ensure WCAG compliance and inclusive design
+- **Code Review**: Use AI to review code for best practices and potential issues
+
+#### 🔍 **Required Testing Before Merge**
+**All AI-generated code MUST be thoroughly tested before submission:**
+
+- [ ] **Manual Testing**: Test all functionality in multiple browsers
+- [ ] **Accessibility Testing**: Verify screen reader compatibility and keyboard navigation
+- [ ] **Data Integrity**: Ensure localStorage operations work correctly
+- [ ] **Error Handling**: Test edge cases and error scenarios
+- [ ] **Performance**: Verify no performance regressions
+- [ ] **Cross-browser**: Test in Chrome, Firefox, Safari, and Edge
+- [ ] **Mobile Testing**: Verify responsive design works on mobile devices
+
+#### 📝 **AI Transparency Requirements**
+When submitting AI-assisted code:
+
+1. **Mention AI Usage**: Include a note in your PR description about AI assistance
+2. **Explain the Approach**: Describe how AI was used (code generation, debugging, etc.)
+3. **Document Changes**: Ensure all AI-generated code is properly documented
+4. **Verify Logic**: Double-check that AI-generated logic is correct and efficient
+
+#### 🚫 **What to Avoid**
+- **Blind Copy-Paste**: Never submit AI code without understanding and testing it
+- **Sensitive Data**: Don't share private data with AI tools
+- **Untested Code**: Never submit code that hasn't been thoroughly tested
+- **Over-reliance**: Use AI as a tool, not a replacement for critical thinking
+
+#### 💡 **Best Practices**
+- **Iterative Development**: Use AI to generate initial code, then refine and improve
+- **Code Review**: Always review AI-generated code for logic and efficiency
+- **Documentation**: Add clear comments explaining complex AI-generated logic
+- **Testing First**: Write tests before or alongside AI-generated code
+- **Learning**: Use AI as a learning tool to understand new concepts and patterns
+
+### Example PR Description
+```markdown
+## AI-Assisted Feature: [Feature Name]
+
+**AI Usage**: Used [AI Tool] to help generate the initial [component/function] and then manually refined and tested the implementation.
+
+**Testing Completed**:
+- [x] Manual testing in Chrome, Firefox, Safari, Edge
+- [x] Accessibility testing with screen reader
+- [x] Mobile responsiveness verified
+- [x] Data persistence tested
+- [x] Error handling verified
+
+**Changes**:
+- Added [specific functionality]
+- Improved [specific area]
+- Fixed [specific issue]
+```
+
 ## Getting Help
 
 - **GitHub Issues**: For bugs and feature requests
 - **GitHub Discussions**: For questions and general discussion
 - **Documentation**: Check the docs/ folder for detailed guides
+- **AI Development**: Feel free to discuss AI-assisted development approaches in discussions
 
 ## Recognition
 
