@@ -2,6 +2,8 @@
 
 A comprehensive web application for tracking theatre performances, ratings, expenses, and analytics. Built with vanilla HTML, CSS, and JavaScript - no frameworks required!
 
+> **Note**: This project was primarily created for me and my partner to track our own theatre shows because I thought it would be fun to make. It's only on GitHub in case anyone else wants to fuck around with it! Feel free to use it, modify it, or ignore it entirely. 🎭✨
+
 
 
 ## ✨ Features
@@ -41,7 +43,7 @@ A comprehensive web application for tracking theatre performances, ratings, expe
 ### Option 2: Local Server (Recommended)
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/stagelog.git
+git clone https://github.com/spike1478/stagelog.git
 cd stagelog
 
 # Serve with Python (if installed)
@@ -124,14 +126,14 @@ StageLog is designed with privacy in mind:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Since this is primarily a personal project, contributions are welcome but not expected! If you want to mess around with it, please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ### Development Setup
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Test thoroughly
-5. Submit a pull request
+5. Submit a pull request (or don't - it's up to you!)
 
 ## 📄 License
 
@@ -139,8 +141,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/yourusername/stagelog/issues)
-- **Discussions**: Join the conversation in [GitHub Discussions](https://github.com/yourusername/stagelog/discussions)
+- **Issues**: Found a bug? Feel free to report it on [GitHub Issues](https://github.com/spike1478/stagelog/issues) (but no promises on fixes!)
+- **Discussions**: Want to chat about it? Join the conversation in [GitHub Discussions](https://github.com/spike1478/stagelog/discussions)
 - **Documentation**: Check the [docs/](docs/) folder for detailed guides
 
 ## 🎯 Roadmap
