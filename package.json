@@ -28,16 +28,16 @@
   "author": {
     "name": "StageLog Development Team",
     "email": "contact@stagelog.app",
-    "url": "https://github.com/yourusername/stagelog"
+    "url": "https://github.com/spike1478/stagelog"
   },
   "license": "MIT",
-  "homepage": "https://github.com/yourusername/stagelog#readme",
+  "homepage": "https://github.com/spike1478/stagelog#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/stagelog.git"
+    "url": "https://github.com/spike1478/stagelog.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/stagelog/issues"
+    "url": "https://github.com/spike1478/stagelog/issues"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -68,7 +68,7 @@
   "dependencies": {},
   "funding": {
     "type": "individual",
-    "url": "https://github.com/sponsors/yourusername"
+    "url": "https://github.com/sponsors/spike1478"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"

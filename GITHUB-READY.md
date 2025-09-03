@@ -59,16 +59,16 @@ git add .
 git commit -m "Initial commit: StageLog v2.5.0"
 
 # Create repository on GitHub, then:
-git remote add origin https://github.com/yourusername/stagelog.git
+git remote add origin https://github.com/spike1478/stagelog.git
 git branch -M main
 git push -u origin main
 ```
 
 ### 2. Update Repository URLs
-Replace `yourusername` in these files:
-- `README.md` (multiple locations)
-- `package.json` (homepage, repository, bugs URLs)
-- `.github/ISSUE_TEMPLATE/config.yml`
+✅ **All URLs Updated** - All references to `yourusername` have been replaced with `spike1478`:
+- `README.md` (multiple locations) ✅
+- `package.json` (homepage, repository, bugs URLs) ✅
+- `.github/ISSUE_TEMPLATE/config.yml` ✅
 
 ### 3. Configure GitHub Settings
 - Enable GitHub Pages (if desired)
