@@ -2694,14 +2694,14 @@ function closePerformanceModal() {
     }
 }
 
-// Google Drive Export Function
-function exportToDrive() {
+// Data Export Function
+function exportData() {
     try {
         // Get all StageLog data from localStorage
         const stagelogData = {
             exportDate: new Date().toISOString(),
-            exportType: "StageLog Drive Backup",
-            version: "2.0.0",
+            exportType: "StageLog Data Backup",
+            version: "2.5.0",
             stagelog_shows: JSON.parse(localStorage.getItem('stagelog_shows') || '[]'),
             stagelog_performances: JSON.parse(localStorage.getItem('stagelog_performances') || '[]'),
             stagelog_access_schemes: JSON.parse(localStorage.getItem('stagelog_access_schemes') || '[]'),
@@ -2730,9 +2730,9 @@ function exportToDrive() {
         
         // Show success message
         const count = stagelogData.stagelog_performances.length;
-        alert(`✅ StageLog backup exported successfully!\n\n📁 File: ${filename}\n🎭 ${count} performances backed up\n\n💡 Save this file to your Google Drive folder for automatic cloud backup!`);
+        alert(`✅ StageLog backup exported successfully!\n\n📁 File: ${filename}\n🎭 ${count} performances backed up\n\n💡 Save this file somewhere safe for backup!`);
         
-        console.log('🌩️ Drive export completed:', filename);
+        console.log('📁 Data export completed:', filename);
         
     } catch (error) {
         console.error('❌ Export error:', error);
@@ -3331,14 +3331,14 @@ function closePerformanceModal() {
     }
 }
 
-// Google Drive Export Function
-function exportToDrive() {
+// Data Export Function
+function exportData() {
     try {
         // Get all StageLog data from localStorage
         const stagelogData = {
             exportDate: new Date().toISOString(),
-            exportType: "StageLog Drive Backup",
-            version: "2.0.0",
+            exportType: "StageLog Data Backup",
+            version: "2.5.0",
             stagelog_shows: JSON.parse(localStorage.getItem('stagelog_shows') || '[]'),
             stagelog_performances: JSON.parse(localStorage.getItem('stagelog_performances') || '[]'),
             stagelog_access_schemes: JSON.parse(localStorage.getItem('stagelog_access_schemes') || '[]'),
@@ -3367,9 +3367,9 @@ function exportToDrive() {
         
         // Show success message
         const count = stagelogData.stagelog_performances.length;
-        alert(`✅ StageLog backup exported successfully!\n\n📁 File: ${filename}\n🎭 ${count} performances backed up\n\n💡 Save this file to your Google Drive folder for automatic cloud backup!`);
+        alert(`✅ StageLog backup exported successfully!\n\n📁 File: ${filename}\n🎭 ${count} performances backed up\n\n💡 Save this file somewhere safe for backup!`);
         
-        console.log('🌩️ Drive export completed:', filename);
+        console.log('📁 Data export completed:', filename);
         
     } catch (error) {
         console.error('❌ Export error:', error);
