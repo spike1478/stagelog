@@ -725,26 +725,22 @@ class StatsSystem {
 
     // Export functionality
     exportStats(format = 'json') {
+        // Always export JSON including full data (performances include seat_location)
         const exportData = {
             generated: new Date().toISOString(),
-            stats: this.stats,
-            rawData: {
-                performanceCount: this.data.performances.length,
-                showCount: this.data.shows.length
-            }
+            performances: this.data.performances || [],
+            shows: this.data.shows || [],
+            access_schemes: this.data.accessSchemes || [],
+            stats: this.stats
         };
 
-        if (format === 'json') {
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `stagelog-stats-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        } else if (format === 'csv') {
-            this.exportStatsCSV();
-        }
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `stagelog-data-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
     exportStatsCSV() {
