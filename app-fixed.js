@@ -1721,6 +1721,14 @@ class StageLogApp {
                 // Trigger production type change to show/hide fields
                 this.handleProductionTypeChange(performance.production_type);
             }
+            
+            // Populate musical checkbox
+            const isMusicalField = document.getElementById('is-musical');
+            if (isMusicalField) {
+                isMusicalField.checked = performance.is_musical !== false; // Default to true if undefined
+                // Trigger musical change to show/hide music rating
+                this.handleMusicalChange(isMusicalField.checked);
+            }
             if (notesAccessField) notesAccessField.value = performance.notes_on_access || '';
             if (generalNotesField) generalNotesField.value = performance.general_notes || '';
             
@@ -1732,7 +1740,7 @@ class StageLogApp {
             
             ratingFields.forEach(fieldId => {
                 const element = document.getElementById(fieldId);
-                const ratingKey = fieldId.replace('-', '_');
+                const ratingKey = fieldId.replace(/-/g, '_'); // Replace ALL hyphens with underscores
                 if (element && performance.rating[ratingKey] !== undefined) {
                     const ratingValue = performance.rating[ratingKey];
                     console.log(`Setting ${fieldId} to ${ratingValue}`);
@@ -1769,9 +1777,9 @@ class StageLogApp {
             
             // Show a summary of the current ratings for user reference
             const ratingSummary = ratingFields.map(fieldId => {
-                const ratingKey = fieldId.replace('-', '_');
+                const ratingKey = fieldId.replace(/-/g, '_'); // Replace ALL hyphens with underscores
                 const value = performance.rating[ratingKey] || 0;
-                return `${fieldId.replace('-', ' ')}: ${value}`;
+                return `${fieldId.replace(/-/g, ' ')}: ${value}`; // Replace ALL hyphens with spaces for display
             }).join(', ');
             
             console.log('Form populated successfully with expense data');
@@ -1945,6 +1953,22 @@ class StageLogApp {
          });
      }
 
+     handleMusicalChange(isMusical) {
+         console.log('Musical status changed to:', isMusical);
+         
+         const musicGroup = document.getElementById('music-songs-group');
+         if (musicGroup) {
+             if (!isMusical) {
+                 musicGroup.classList.add('non-musical-hidden');
+                 // Clear the music rating for non-musicals
+                 const select = musicGroup.querySelector('select');
+                 if (select) select.value = '';
+             } else {
+                 musicGroup.classList.remove('non-musical-hidden');
+             }
+         }
+     }
+
      handleDateChange() {
          const dateField = document.getElementById('date-seen');
          if (!dateField || !dateField.value) return;
@@ -2046,9 +2070,10 @@ class StageLogApp {
                  }
              });
 
-             // Show all rating groups (remove Pro Shot hiding) and reset labels
+             // Show all rating groups (remove Pro Shot and non-musical hiding) and reset labels
              document.querySelectorAll('.rating-group').forEach(group => {
                  group.classList.remove('pro-shot-hidden');
+                 group.classList.remove('non-musical-hidden');
                  
                  // Reset rating labels to required state
                  const label = group.querySelector('label');
@@ -2066,6 +2091,12 @@ class StageLogApp {
                      select.setAttribute('required', 'required');
                  }
              });
+             
+             // Reset musical checkbox to checked (default)
+             const isMusicalField = document.getElementById('is-musical');
+             if (isMusicalField) {
+                 isMusicalField.checked = true;
+             }
              
              // Reset form title and button text
              const pageTitle = document.querySelector('#add-performance h2');
@@ -2183,12 +2214,17 @@ class StageLogApp {
              }
          }
 
+        // Get musical status
+        const isMusicalField = document.getElementById('is-musical');
+        const isMusical = isMusicalField ? isMusicalField.checked : true;
+
         const performanceData = {
             show_id: this.currentShow.id,
             date_seen: dateField.value,
             theatre_name: theatreField.value,
             city: cityField.value,
             production_type: productionTypeField.value,
+            is_musical: isMusical,
             notes_on_access: notesAccessField?.value || '',
             general_notes: generalNotesField?.value || '',
             // Expense tracking
@@ -2627,6 +2663,9 @@ function showPerformanceDetail(performanceId) {
         if (performance.production_type === 'Pro Shot' && 
             ['theatre_experience', 'programme', 'atmosphere'].includes(category.key)) {
             return; // Skip these for Pro Shot
+        }
+        if (!performance.is_musical && category.key === 'music_songs') {
+            return; // Skip music/songs for non-musicals
         }
         
         ratingHtml += `
@@ -3182,6 +3221,14 @@ document.addEventListener('DOMContentLoaded', () => {
          if (productionType) {
              productionType.addEventListener('change', (e) => {
                  window.app.handleProductionTypeChange(e.target.value);
+             });
+         }
+         
+         // Set up musical checkbox change
+         const isMusical = document.getElementById('is-musical');
+         if (isMusical) {
+             isMusical.addEventListener('change', (e) => {
+                 window.app.handleMusicalChange(e.target.checked);
              });
          }
          

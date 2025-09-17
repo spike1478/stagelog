@@ -10,9 +10,11 @@ A web app for tracking theatre shows because why not? Built with vanilla HTML, C
 
 ### 🎪 Performance Tracking
 - **Add Shows**: Because remembering what you saw is hard
-- **Rate Everything**: Overall, Acting, Production, Atmosphere - judge away!
+- **Rate Everything**: Multi-dimensional rating system with weighted scoring
+- **Musical vs Non-Musical**: Smart rating system that adapts based on show type
 - **Track Spending**: Because theatre is expensive and we need to know just how broke we are
 - **Pro Shot Magic**: Special handling for when you watch recordings instead of going out
+- **Edit Ratings**: Update your ratings anytime - no more being stuck with first impressions!
 
 ### 📊 Analytics (Because Data is Fun)
 - **Stats Galore**: How many shows? How much money? How many regrets?
@@ -63,9 +65,16 @@ Then open `http://localhost:8000` in your browser.
 ### Adding a Performance
 1. Click "Add Performance" in the navigation
 2. Fill in the show details (title, venue, date, etc.)
-3. Rate the performance across different categories
-4. Add expense information (optional)
-5. Save your performance
+3. Select production type and whether it's a musical
+4. Rate the performance across different categories (system adapts based on show type)
+5. Add expense information (optional)
+6. Save your performance
+
+### Rating System
+- **Musicals**: Music/Songs, Performance/Cast, Stage/Visuals, Story/Plot, Theatre Experience, Programme, Atmosphere
+- **Non-Musicals**: Performance/Cast, Stage/Visuals, Story/Plot, Theatre Experience, Programme, Atmosphere (no Music/Songs)
+- **Pro Shot**: Excludes venue-specific ratings (Theatre Experience, Programme, Atmosphere)
+- **Weighted Scoring**: Different weight distributions for musicals vs non-musicals for fair comparison
 
 ### Viewing Analytics
 1. Click "Analytics" in the navigation
@@ -146,6 +155,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎯 Roadmap (If We Feel Like It)
 
+- [ ] Device sync feature (for exactly 2 devices - coming soon!)
 - [ ] Maybe cloud sync (probably not)
 - [ ] Mobile app (if we get really bored)
 - [ ] Social features (because we need more drama in our lives)

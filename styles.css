@@ -641,6 +641,31 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     display: none !important;
 }
 
+/* Non-musical specific styling */
+.non-musical-hidden {
+    display: none !important;
+}
+
+/* Checkbox styling */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 0.5rem;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.checkbox-label .checkmark {
+    margin-left: 0.5rem;
+}
+
 /* Optional rating styling */
 .rating-group label:contains("(optional)") {
     color: #666 !important;

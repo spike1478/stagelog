@@ -212,12 +212,21 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="is-musical" checked>
+                                <span class="checkmark"></span>
+                                This is a Musical
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-section">
                     <h3>Rating</h3>
                     <div class="rating-grid">
-                        <div class="rating-group">
+                        <div class="rating-group" id="music-songs-group">
                             <label for="music-songs">Music/Songs *</label>
                             <select id="music-songs" name="music-songs" required>
                                 <option value="">Select rating...</option>

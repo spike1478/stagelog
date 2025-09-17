@@ -15,6 +15,8 @@ class StatsSystem {
         this.isInitialized = false;
     }
 
+    // (Removed numeric threshold helpers per user preference)
+
     async init() {
         console.log('📊 Initializing Stats System...');
         await this.loadData();
@@ -488,21 +490,17 @@ class StatsSystem {
         const performances = this.data.performances;
         const achievements = [];
 
-        // Show count achievements
-        if (performances.length >= 1) achievements.push({ name: 'First Steps', description: 'Seen your first show!', icon: '👶' });
-        if (performances.length >= 3) achievements.push({ name: 'Getting Started', description: 'Seen 3+ shows', icon: '🚀' });
-        if (performances.length >= 5) achievements.push({ name: 'Theatre Newbie', description: 'Seen 5+ shows', icon: '🎭' });
-        if (performances.length >= 10) achievements.push({ name: 'Theatre Enthusiast', description: 'Seen 10+ shows', icon: '🎪' });
-        if (performances.length >= 15) achievements.push({ name: 'Theatre Addict', description: 'Seen 15+ shows', icon: '🤪' });
-        if (performances.length >= 20) achievements.push({ name: 'Theatre Lover', description: 'Seen 20+ shows', icon: '💕' });
-        if (performances.length >= 25) achievements.push({ name: 'Theatre Obsessed', description: 'Seen 25+ shows', icon: '😍' });
-        if (performances.length >= 30) achievements.push({ name: 'Theatre Expert', description: 'Seen 30+ shows', icon: '🏆' });
-        if (performances.length >= 40) achievements.push({ name: 'Theatre Master', description: 'Seen 40+ shows', icon: '🎓' });
-        if (performances.length >= 50) achievements.push({ name: 'Theatre Legend', description: 'Seen 50+ shows', icon: '👑' });
-        if (performances.length >= 75) achievements.push({ name: 'Theatre Deity', description: 'Seen 75+ shows', icon: '⚡' });
-        if (performances.length >= 100) achievements.push({ name: 'Theatre God', description: 'Seen 100+ shows', icon: '🌟' });
+        // Curated, non-boring milestones
+        const totalShows = performances.length;
+        if (totalShows >= 1) achievements.push({ name: 'Opening Night', description: 'Your first-ever logged show!', icon: '🎉' });
+        if (totalShows >= 7) achievements.push({ name: 'Lucky Seven', description: 'Seven shows in your journey', icon: '🍀' });
+        if (totalShows >= 13) achievements.push({ name: 'Unlucky for Wallet', description: 'Thirteen shows and counting', icon: '🖤' });
+        if (totalShows >= 21) achievements.push({ name: 'Blackjack', description: 'Hit 21 shows like a pro', icon: '🃏' });
+        if (totalShows >= 42) achievements.push({ name: 'Answer to Everything', description: 'Forty-two shows (Douglas would be proud)', icon: '🤖' });
+        if (totalShows >= 69) achievements.push({ name: 'Nice.', description: 'You know why.', icon: '😏' });
+        if (totalShows >= 100) achievements.push({ name: 'Century Club', description: 'One hundred shows witnessed', icon: '💯' });
 
-        // Spending achievements
+        // Spending achievements (total spent GBP)
         const totalSpent = performances.reduce((sum, p) => {
             const ticketPrice = parseFloat(p.ticket_price) || 0;
             const bookingFee = parseFloat(p.booking_fee) || 0;
@@ -510,37 +508,23 @@ class StatsSystem {
             const otherExpenses = parseFloat(p.other_expenses) || 0;
             return sum + ticketPrice + bookingFee + travelCost + otherExpenses;
         }, 0);
-        
-        if (totalSpent >= 50) achievements.push({ name: 'Small Spender', description: 'Spent £50+ on theatre', icon: '🪙' });
-        if (totalSpent >= 100) achievements.push({ name: 'Budget Theatre', description: 'Spent £100+ on theatre', icon: '💸' });
-        if (totalSpent >= 250) achievements.push({ name: 'Theatre Shopper', description: 'Spent £250+ on theatre', icon: '🛒' });
-        if (totalSpent >= 500) achievements.push({ name: 'Big Spender', description: 'Spent £500+ on theatre', icon: '💰' });
-        if (totalSpent >= 750) achievements.push({ name: 'Theatre Investor', description: 'Spent £750+ on theatre', icon: '💎' });
-        if (totalSpent >= 1000) achievements.push({ name: 'Theatre Tycoon', description: 'Spent £1000+ on theatre', icon: '🏦' });
-        if (totalSpent >= 1500) achievements.push({ name: 'Theatre Millionaire', description: 'Spent £1500+ on theatre', icon: '💵' });
-        if (totalSpent >= 2000) achievements.push({ name: 'Theatre Billionaire', description: 'Spent £2000+ on theatre', icon: '🤑' });
+        // Fun spendies (no ladders)
+        if (totalSpent >= 100) achievements.push({ name: 'Patron of the Arts', description: 'Spent triple digits on theatre', icon: '💷' });
+        if (totalSpent >= 500) achievements.push({ name: 'Big Night Out', description: 'Half a grand to the stage gods', icon: '💰' });
+        if (totalSpent >= 1000) achievements.push({ name: 'Serious Supporter', description: 'Four figures deep', icon: '🏦' });
+        if (totalSpent >= 2000) achievements.push({ name: 'Angel Investor', description: 'Now you’re producing vibes', icon: '😇' });
 
         // Rating achievements
         const ratings = performances.map(p => parseFloat(p.weighted_rating) || 0).filter(r => r > 0);
         const avgRating = ratings.length > 0 ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length) : 0;
-        
-        if (avgRating >= 1.0 && avgRating < 2.0) achievements.push({ name: 'Harsh Critic', description: 'Average rating 1.0-1.9', icon: '😤' });
-        if (avgRating >= 2.0 && avgRating < 3.0) achievements.push({ name: 'Tough Judge', description: 'Average rating 2.0-2.9', icon: '😠' });
-        if (avgRating >= 3.0 && avgRating < 4.0) achievements.push({ name: 'Fair Reviewer', description: 'Average rating 3.0-3.9', icon: '😐' });
-        if (avgRating >= 4.0 && avgRating < 4.5) achievements.push({ name: 'Positive Patron', description: 'Average rating 4.0-4.4', icon: '😊' });
-        if (avgRating >= 4.5) achievements.push({ name: 'Quality Seeker', description: 'Average rating 4.5+', icon: '⭐' });
-        if (avgRating >= 4.8) achievements.push({ name: 'Eternal Optimist', description: 'Average rating 4.8+', icon: '🌈' });
-        if (avgRating >= 4.9) achievements.push({ name: 'Theatre Pollyanna', description: 'Average rating 4.9+', icon: '🦄' });
+        if (avgRating > 4.5) achievements.push({ name: 'Quality Magnet', description: 'You pick winners (avg > 4.5)', icon: '🏅' });
+        if (avgRating < 2.5 && ratings.length >= 5) achievements.push({ name: 'Tough Crowd', description: 'Low average but high standards', icon: '😤' });
 
         // Venue diversity achievements
         const uniqueVenues = new Set(performances.map(p => p.theatre_name)).size;
-        if (uniqueVenues >= 2) achievements.push({ name: 'Venue Explorer', description: 'Visited 2+ different venues', icon: '🚶' });
-        if (uniqueVenues >= 3) achievements.push({ name: 'Venue Tourist', description: 'Visited 3+ different venues', icon: '🧳' });
-        if (uniqueVenues >= 5) achievements.push({ name: 'Venue Nomad', description: 'Visited 5+ different venues', icon: '🏛️' });
-        if (uniqueVenues >= 7) achievements.push({ name: 'Venue Collector', description: 'Visited 7+ different venues', icon: '🗺️' });
-        if (uniqueVenues >= 10) achievements.push({ name: 'Theatre Nomad', description: 'Visited 10+ different venues', icon: '🌍' });
-        if (uniqueVenues >= 15) achievements.push({ name: 'Venue Hopper', description: 'Visited 15+ different venues', icon: '🐰' });
-        if (uniqueVenues >= 20) achievements.push({ name: 'Theatre Wanderer', description: 'Visited 20+ different venues', icon: '🎪' });
+        if (uniqueVenues >= 3) achievements.push({ name: 'Venue Tourist', description: 'A sampler of stages', icon: '🧳' });
+        if (uniqueVenues >= 10) achievements.push({ name: 'Stage Hopper', description: 'Double digits of different venues', icon: '🏛️' });
+        if (uniqueVenues >= 20) achievements.push({ name: 'Theatre Wanderer', description: 'Twenty different venues explored', icon: '🌍' });
 
         // Repeat shows achievements
         const showCounts = {};
@@ -570,12 +554,9 @@ class StatsSystem {
         });
         
         const maxRepeats = Object.values(showCounts).length > 0 ? Math.max(...Object.values(showCounts)) : 0;
-        if (maxRepeats >= 2) achievements.push({ name: 'Show Repeater', description: 'Seen a show 2+ times', icon: '🔄' });
-        if (maxRepeats >= 3) achievements.push({ name: 'Show Devotee', description: 'Seen a show 3+ times', icon: '❤️' });
-        if (maxRepeats >= 4) achievements.push({ name: 'Show Stalker', description: 'Seen a show 4+ times', icon: '👀' });
-        if (maxRepeats >= 5) achievements.push({ name: 'Show Obsessed', description: 'Seen a show 5+ times', icon: '😵' });
-        if (maxRepeats >= 7) achievements.push({ name: 'Show Addict', description: 'Seen a show 7+ times', icon: '🤯' });
-        if (maxRepeats >= 10) achievements.push({ name: 'Show Legend', description: 'Seen a show 10+ times', icon: '👑' });
+        if (maxRepeats >= 2) achievements.push({ name: 'Second Helping', description: 'You went back for seconds', icon: '🍰' });
+        if (maxRepeats >= 5) achievements.push({ name: 'Superfan', description: 'Five or more repeat visits to one show', icon: '❤️' });
+        if (maxRepeats >= 10) achievements.push({ name: 'Resident Cast?', description: 'Ten+ times to the same show', icon: '👑' });
 
         // Funny spending pattern achievements
         const expensiveShows = performances.filter(p => {
@@ -596,10 +577,10 @@ class StatsSystem {
             return totalCost > 0 && totalCost <= 25;
         }).length;
 
-        if (expensiveShows >= 5) achievements.push({ name: 'Premium Patron', description: 'Seen 5+ shows over £100', icon: '💎' });
-        if (expensiveShows >= 10) achievements.push({ name: 'Luxury Lover', description: 'Seen 10+ shows over £100', icon: '🏆' });
-        if (cheapShows >= 5) achievements.push({ name: 'Budget Boss', description: 'Seen 5+ shows under £25', icon: '💸' });
-        if (cheapShows >= 10) achievements.push({ name: 'Penny Pincher', description: 'Seen 10+ shows under £25', icon: '🪙' });
+        if (expensiveShows >= 1) achievements.push({ name: 'Bougie Night', description: 'At least one show over £100', icon: '💎' });
+        if (expensiveShows >= 5) achievements.push({ name: 'Premium Patron', description: 'Five high-roller nights', icon: '💎' });
+        if (cheapShows >= 1) achievements.push({ name: 'Bargain Hunter', description: 'Snagged a budget ticket', icon: '🪙' });
+        if (cheapShows >= 5) achievements.push({ name: 'Budget Boss', description: 'Five bargains under £25', icon: '💸' });
 
         // Time-based achievements
         const now = new Date();
@@ -614,10 +595,8 @@ class StatsSystem {
             return showDate >= weekAgo;
         }).length;
 
-        if (thisMonth >= 3) achievements.push({ name: 'Monthly Madness', description: 'Seen 3+ shows this month', icon: '📅' });
-        if (thisMonth >= 5) achievements.push({ name: 'Monthly Maniac', description: 'Seen 5+ shows this month', icon: '🗓️' });
-        if (thisWeek >= 2) achievements.push({ name: 'Weekly Warrior', description: 'Seen 2+ shows this week', icon: '⚔️' });
-        if (thisWeek >= 3) achievements.push({ name: 'Weekly Wizard', description: 'Seen 3+ shows this week', icon: '🧙' });
+        if (thisMonth >= 3) achievements.push({ name: 'Monthly Madness', description: 'Three shows in a single month', icon: '📅' });
+        if (thisWeek >= 2) achievements.push({ name: 'Weekly Warrior', description: 'Two shows in a week', icon: '⚔️' });
 
         // Rating distribution achievements
         const ratingDistribution = {};
@@ -636,14 +615,16 @@ class StatsSystem {
         if (totalSpent >= 1000 && avgRating <= 3.0) achievements.push({ name: 'Expensive Disappointment', description: 'Spent £1000+ with low ratings', icon: '😭' });
         if (performances.length >= 15 && maxRepeats >= 3) achievements.push({ name: 'Loyal Customer', description: '15+ shows with 3+ repeats', icon: '🤝' });
 
-        // Silly achievements
-        if (performances.length >= 1) achievements.push({ name: 'Theatre Virgin', description: 'Lost your theatre virginity', icon: '🌸' });
-        if (performances.length >= 7) achievements.push({ name: 'Lucky Seven', description: 'Seen exactly 7 shows (or more)', icon: '🍀' });
-        if (performances.length >= 13) achievements.push({ name: 'Unlucky Thirteen', description: 'Seen 13+ shows (unlucky for your wallet)', icon: '🖤' });
-        if (performances.length >= 21) achievements.push({ name: 'Blackjack', description: 'Seen 21+ shows', icon: '🃏' });
-        if (performances.length >= 42) achievements.push({ name: 'Answer to Everything', description: 'Seen 42+ shows (the answer to life)', icon: '🤖' });
-        if (performances.length >= 69) achievements.push({ name: 'Nice', description: 'Seen 69+ shows (nice)', icon: '😏' });
-        if (performances.length >= 100) achievements.push({ name: 'Century Club', description: 'Seen 100+ shows', icon: '💯' });
+        // Silly achievements (flair)
+        [
+            { t: 1, name: 'Theatre Virgin', icon: '🌸', desc: 'Lost your theatre virginity' },
+            { t: 7, name: 'Lucky Seven', icon: '🍀', desc: 'Seen 7+ shows' },
+            { t: 13, name: 'Unlucky Thirteen', icon: '🖤', desc: 'Seen 13+ shows' },
+            { t: 21, name: 'Blackjack', icon: '🃏', desc: 'Seen 21+ shows' },
+            { t: 42, name: 'Answer to Everything', icon: '🤖', desc: 'Seen 42+ shows' },
+            { t: 69, name: 'Nice', icon: '😏', desc: 'Seen 69+ shows' },
+            { t: 100, name: 'Century Club', icon: '💯', desc: 'Seen 100+ shows' }
+        ].forEach(s => { if (totalShows >= s.t) achievements.push({ name: s.name, description: s.desc, icon: s.icon }); });
 
         // Special venue achievements
         const venueNames = performances.map(p => p.theatre_name?.toLowerCase() || '');
