@@ -165,6 +165,7 @@ class StageLogDB {
             theatre_name: performanceData.theatre_name,
             city: performanceData.city,
             production_type: performanceData.production_type,
+            is_musical: performanceData.is_musical !== undefined ? performanceData.is_musical : true, // Default to true for backward compatibility
             notes_on_access: performanceData.notes_on_access || '',
             general_notes: performanceData.general_notes || '',
             // Expense tracking
@@ -184,7 +185,7 @@ class StageLogDB {
                 programme: parseFloat(performanceData.rating.programme || 0),
                 atmosphere: parseFloat(performanceData.rating.atmosphere || 0)
             },
-            weighted_rating: this.calculateWeightedRating(performanceData.rating, performanceData.production_type),
+            weighted_rating: this.calculateWeightedRating(performanceData.rating, performanceData.production_type, performanceData.is_musical),
             created_at: new Date().toISOString()
         };
         performances.push(performance);
@@ -214,7 +215,8 @@ class StageLogDB {
                 booking_fee: parseFloat(performanceData.booking_fee || performances[index].booking_fee || 0),
                 travel_cost: parseFloat(performanceData.travel_cost || performances[index].travel_cost || 0),
                 other_expenses: parseFloat(performanceData.other_expenses || performances[index].other_expenses || 0),
-                weighted_rating: this.calculateWeightedRating(performanceData.rating, performanceData.production_type),
+                is_musical: performanceData.is_musical !== undefined ? performanceData.is_musical : performances[index].is_musical,
+                weighted_rating: this.calculateWeightedRating(performanceData.rating, performanceData.production_type, performanceData.is_musical),
                 updated_at: new Date().toISOString()
             };
             localStorage.setItem('stagelog_performances', JSON.stringify(performances));
@@ -235,20 +237,34 @@ class StageLogDB {
         return performances.find(p => p.id === id);
     }
 
-    // Calculate weighted rating based on production type
-    calculateWeightedRating(rating, productionType) {
-        const weights = {
-            music_songs: 0.2727,
-            performance_cast: 0.2727,
-            stage_visuals: 0.2273,
-            story_plot: 0.1591,
-            rewatch_value: 0.0682
+    // Calculate weighted rating based on production type and whether it's a musical
+    calculateWeightedRating(rating, productionType, isMusical = true) {
+        // Different weight distributions for musicals vs non-musicals
+        const musicalWeights = {
+            music_songs: 0.25,         // Music and songs
+            performance_cast: 0.20,    // Singing and acting
+            stage_visuals: 0.20,       // Choreography, sets, costumes
+            story_plot: 0.15,          // Book/script quality
+            theatre_experience: 0.10,  // Overall venue experience
+            programme: 0.05,           // Quality of program/playbill
+            atmosphere: 0.05           // General theatre atmosphere
         };
+
+        const nonMusicalWeights = {
+            performance_cast: 0.25,    // Acting in plays
+            stage_visuals: 0.20,       // Staging/design
+            story_plot: 0.20,          // Story in plays
+            theatre_experience: 0.15,  // Overall venue experience
+            programme: 0.10,           // Quality of program/playbill
+            atmosphere: 0.10           // General theatre atmosphere
+        };
+
+        const weights = isMusical ? musicalWeights : nonMusicalWeights;
 
         let weightedScore = 0;
         let totalWeight = 0;
 
-        // Core ratings (always included)
+        // Core ratings (always included, but different weights for musicals vs non-musicals)
         for (const [key, weight] of Object.entries(weights)) {
             if (rating[key] && rating[key] > 0) {
                 weightedScore += rating[key] * weight;
@@ -256,20 +272,22 @@ class StageLogDB {
             }
         }
 
-        // For non-Pro Shot productions, include in-person experience factors
-        if (productionType !== 'Pro Shot') {
-            const experienceWeight = 0.0;  // Adjust these weights as needed
-            if (rating.theatre_experience && rating.theatre_experience > 0) {
-                weightedScore += rating.theatre_experience * experienceWeight;
-                totalWeight += experienceWeight;
-            }
-            if (rating.programme && rating.programme > 0) {
-                weightedScore += rating.programme * experienceWeight;
-                totalWeight += experienceWeight;
-            }
-            if (rating.atmosphere && rating.atmosphere > 0) {
-                weightedScore += rating.atmosphere * experienceWeight;
-                totalWeight += experienceWeight;
+        // For Pro Shot productions, exclude in-person experience factors
+        if (productionType === 'Pro Shot') {
+            // Remove experience factors from the calculation for Pro Shot
+            const proShotWeights = { ...weights };
+            delete proShotWeights.theatre_experience;
+            delete proShotWeights.programme;
+            delete proShotWeights.atmosphere;
+            
+            // Recalculate with only the core factors
+            weightedScore = 0;
+            totalWeight = 0;
+            for (const [key, weight] of Object.entries(proShotWeights)) {
+                if (rating[key] && rating[key] > 0) {
+                    weightedScore += rating[key] * weight;
+                    totalWeight += weight;
+                }
             }
         }
 
