@@ -3285,7 +3285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Global functions for modal handling
-function showSyncModal() {
+window.showSyncModal = function() {
     const modal = document.getElementById('sync-modal');
     if (modal) {
         modal.style.display = 'block';
@@ -3302,7 +3302,7 @@ function showSyncModal() {
     }
 }
 
-function closeSyncModal() {
+window.closeSyncModal = function() {
     const modal = document.getElementById('sync-modal');
     if (modal) {
         modal.style.display = 'none';
@@ -3310,7 +3310,7 @@ function closeSyncModal() {
     }
 }
 
-function closeModal(event) {
+window.closeModal = function(event) {
     // Close modal when clicking outside the modal content
     if (event.target === event.currentTarget) {
         const modal = event.target;
@@ -3319,7 +3319,7 @@ function closeModal(event) {
     }
 }
 
-function createSyncRoom() {
+window.createSyncRoom = function() {
     if (!window.firebaseSync) {
         alert('Firebase sync not initialized. Please refresh the page.');
         return;
@@ -3345,12 +3345,12 @@ function createSyncRoom() {
     });
 }
 
-function showJoinRoom() {
+window.showJoinRoom = function() {
     document.getElementById('sync-setup').classList.add('hidden');
     document.getElementById('sync-join-room').classList.remove('hidden');
 }
 
-function joinSyncRoom() {
+window.joinSyncRoom = function() {
     const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
     
     if (!roomCode) {
@@ -3374,7 +3374,7 @@ function joinSyncRoom() {
     });
 }
 
-function copyRoomCode() {
+window.copyRoomCode = function() {
     const roomCodeInput = document.getElementById('room-code-display');
     roomCodeInput.select();
     roomCodeInput.setSelectionRange(0, 99999); // For mobile devices
@@ -3393,7 +3393,7 @@ function copyRoomCode() {
     }
 }
 
-function disconnectSync() {
+window.disconnectSync = function() {
     if (window.firebaseSync) {
         window.firebaseSync.disconnect().then(() => {
             // Reset UI
@@ -3408,7 +3408,7 @@ function disconnectSync() {
 }
 
 // New function to disconnect from settings page
-function disconnectSyncFromSettings() {
+window.disconnectSyncFromSettings = function() {
     if (window.firebaseSync) {
         window.firebaseSync.disconnect().then(() => {
             updateSettingsSyncStatus();
