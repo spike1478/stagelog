@@ -1972,14 +1972,21 @@ class StageLogApp {
          console.log('Musical status changed to:', isMusical);
          
          const musicGroup = document.getElementById('music-songs-group');
-         if (musicGroup) {
+         const musicSelect = document.getElementById('music-songs');
+         
+         if (musicGroup && musicSelect) {
              if (!isMusical) {
                  musicGroup.classList.add('non-musical-hidden');
                  // Clear the music rating for non-musicals
-                 const select = musicGroup.querySelector('select');
-                 if (select) select.value = '';
+                 musicSelect.value = '';
+                 // Remove required attribute for non-musicals
+                 musicSelect.removeAttribute('required');
+                 console.log('✅ Removed required attribute from music-songs (non-musical)');
              } else {
                  musicGroup.classList.remove('non-musical-hidden');
+                 // Add required attribute for musicals
+                 musicSelect.setAttribute('required', 'required');
+                 console.log('✅ Added required attribute to music-songs (musical)');
              }
          }
      }
@@ -3277,13 +3284,16 @@ document.addEventListener('DOMContentLoaded', () => {
              });
          }
          
-         // Set up musical checkbox change
-         const isMusical = document.getElementById('is-musical');
-         if (isMusical) {
-             isMusical.addEventListener('change', (e) => {
-                 window.app.handleMusicalChange(e.target.checked);
-             });
-         }
+        // Set up musical checkbox change
+        const isMusical = document.getElementById('is-musical');
+        if (isMusical) {
+            isMusical.addEventListener('change', (e) => {
+                window.app.handleMusicalChange(e.target.checked);
+            });
+            
+            // Set initial required attribute based on checkbox state
+            window.app.handleMusicalChange(isMusical.checked);
+        }
          
          // Set up date change to handle rating requirements
          const dateField = document.getElementById('date-seen');
