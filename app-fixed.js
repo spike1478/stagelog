@@ -2814,10 +2814,16 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('preferred-theme', newTheme);
     
-    // Update theme icon
+    // Update theme icons
     const themeIcon = document.getElementById('theme-icon');
+    const settingsThemeIcon = document.getElementById('settings-theme-icon');
+    
     if (themeIcon) {
         themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    
+    if (settingsThemeIcon) {
+        settingsThemeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
     
     // Debug: check computed styles
@@ -2837,8 +2843,14 @@ function initializeTheme() {
     document.documentElement.setAttribute('data-theme', defaultTheme);
     
     const themeIcon = document.getElementById('theme-icon');
+    const settingsThemeIcon = document.getElementById('settings-theme-icon');
+    
     if (themeIcon) {
         themeIcon.className = defaultTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    
+    if (settingsThemeIcon) {
+        settingsThemeIcon.className = defaultTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
 }
 
@@ -3250,8 +3262,15 @@ document.addEventListener('DOMContentLoaded', () => {
              }
          });
          
-         // Initialize theme
-         initializeTheme();
+        // Initialize theme
+        initializeTheme();
+        
+        // Update settings sync status on load
+        setTimeout(() => {
+            if (typeof updateSettingsSyncStatus === 'function') {
+                updateSettingsSyncStatus();
+            }
+        }, 1000);
         
         // Initialize with dashboard
         window.app.loadDashboard();
@@ -3266,6 +3285,301 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Global functions for modal handling
+function showSyncModal() {
+    const modal = document.getElementById('sync-modal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Initialize sync status
+        if (window.firebaseSync) {
+            if (window.firebaseSync.isConnected) {
+                window.firebaseSync.updateSyncStatus('connected', 'Connected to Firebase');
+            } else {
+                window.firebaseSync.updateSyncStatus('connecting', 'Connecting...');
+            }
+        }
+    }
+}
+
+function closeSyncModal() {
+    const modal = document.getElementById('sync-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function closeModal(event) {
+    // Close modal when clicking outside the modal content
+    if (event.target === event.currentTarget) {
+        const modal = event.target;
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function createSyncRoom() {
+    if (!window.firebaseSync) {
+        alert('Firebase sync not initialized. Please refresh the page.');
+        return;
+    }
+    
+    window.firebaseSync.createRoom().then(roomCode => {
+        // Show room created UI first
+        document.getElementById('sync-setup').classList.add('hidden');
+        document.getElementById('sync-room-created').classList.remove('hidden');
+        document.getElementById('room-code-display').value = roomCode;
+        
+        // Update active room display for when sync becomes active
+        document.getElementById('active-room-code').textContent = roomCode;
+        
+        // Show sync active UI after a short delay
+        setTimeout(() => {
+            document.getElementById('sync-room-created').classList.add('hidden');
+            document.getElementById('sync-active').classList.remove('hidden');
+        }, 2000); // 2 second delay to show the room code
+        
+    }).catch(error => {
+        alert('Error creating room: ' + error.message);
+    });
+}
+
+function showJoinRoom() {
+    document.getElementById('sync-setup').classList.add('hidden');
+    document.getElementById('sync-join-room').classList.remove('hidden');
+}
+
+function joinSyncRoom() {
+    const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
+    
+    if (!roomCode) {
+        alert('Please enter a room code.');
+        return;
+    }
+    
+    if (!window.firebaseSync) {
+        alert('Firebase sync not initialized. Please refresh the page.');
+        return;
+    }
+    
+    window.firebaseSync.joinRoom(roomCode).then(() => {
+        // Show sync active UI
+        document.getElementById('sync-join-room').classList.add('hidden');
+        document.getElementById('active-room-code').textContent = roomCode;
+        document.getElementById('sync-active').classList.remove('hidden');
+        
+    }).catch(error => {
+        alert('Error joining room: ' + error.message);
+    });
+}
+
+function copyRoomCode() {
+    const roomCodeInput = document.getElementById('room-code-display');
+    roomCodeInput.select();
+    roomCodeInput.setSelectionRange(0, 99999); // For mobile devices
+    
+    try {
+        document.execCommand('copy');
+        // Show feedback
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+            button.innerHTML = originalText;
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy room code:', err);
+    }
+}
+
+function disconnectSync() {
+    if (window.firebaseSync) {
+        window.firebaseSync.disconnect().then(() => {
+            // Reset UI
+            document.getElementById('sync-active').classList.add('hidden');
+            document.getElementById('sync-setup').classList.remove('hidden');
+            document.getElementById('room-code-input').value = '';
+            
+            // Update settings page sync status
+            updateSettingsSyncStatus();
+        });
+    }
+}
+
+// New function to disconnect from settings page
+function disconnectSyncFromSettings() {
+    if (window.firebaseSync) {
+        window.firebaseSync.disconnect().then(() => {
+            updateSettingsSyncStatus();
+            showFeedback('disconnect-feedback', 'Disconnected from sync successfully', 'success');
+        }).catch(error => {
+            console.error('Error disconnecting:', error);
+            showFeedback('disconnect-feedback', 'Error disconnecting: ' + error.message, 'error');
+        });
+    }
+}
+
+// Feedback system for settings actions
+function showFeedback(elementId, message, type = 'info') {
+    const feedbackElement = document.getElementById(elementId);
+    if (!feedbackElement) return;
+    
+    feedbackElement.textContent = message;
+    feedbackElement.className = `action-feedback ${type} show`;
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        feedbackElement.classList.remove('show');
+    }, 3000);
+}
+
+// Enhanced export function with feedback
+function exportDataWithFeedback() {
+    try {
+        exportData();
+        showFeedback('export-feedback', 'Data exported successfully!', 'success');
+    } catch (error) {
+        showFeedback('export-feedback', 'Export failed: ' + error.message, 'error');
+    }
+}
+
+// Enhanced refresh function with feedback
+function refreshAccessDataWithFeedback() {
+    try {
+        refreshAccessData();
+        showFeedback('refresh-feedback', 'Data refreshed successfully!', 'success');
+    } catch (error) {
+        showFeedback('refresh-feedback', 'Refresh failed: ' + error.message, 'error');
+    }
+}
+
+// Enhanced analytics refresh function with feedback
+function refreshStatsWithFeedback() {
+    try {
+        refreshStats();
+        showFeedback('analytics-refresh-feedback', 'Analytics refreshed! 📊', 'success');
+    } catch (error) {
+        showFeedback('analytics-refresh-feedback', 'Refresh failed: ' + error.message, 'error');
+    }
+}
+
+// Update sync status in settings page
+function updateSettingsSyncStatus() {
+    const statusIcon = document.getElementById('sync-status-icon');
+    const statusText = document.getElementById('sync-status-text');
+    const deviceCount = document.getElementById('device-count');
+    const connectedDevices = document.getElementById('connected-devices');
+    const connectedDevicesList = document.getElementById('connected-devices-list');
+    const disconnectBtn = document.getElementById('disconnect-btn');
+    
+    if (!window.firebaseSync || !window.firebaseSync.isConnected) {
+        // Not connected
+        if (statusIcon) statusIcon.className = 'fas fa-circle disconnected';
+        if (statusText) statusText.textContent = 'Not connected';
+        if (deviceCount) deviceCount.style.display = 'none';
+        if (connectedDevicesList) connectedDevicesList.style.display = 'none';
+        if (disconnectBtn) disconnectBtn.style.display = 'none';
+        return;
+    }
+    
+    // Connected
+    if (statusIcon) statusIcon.className = 'fas fa-circle connected';
+    if (statusText) statusText.textContent = 'Connected to sync';
+    
+    // Update device count and list
+    if (window.firebaseSync.currentRoom) {
+        updateDeviceList();
+    }
+}
+
+// Update device list in settings
+function updateDeviceList() {
+    if (!window.firebaseSync || !window.firebaseSync.currentRoom) return;
+    
+    const deviceCount = document.getElementById('device-count');
+    const connectedDevices = document.getElementById('connected-devices');
+    const connectedDevicesList = document.getElementById('connected-devices-list');
+    const disconnectBtn = document.getElementById('disconnect-btn');
+    
+    // Get device info from Firebase
+    const roomRef = window.firebaseSync.database.ref(`rooms/${window.firebaseSync.currentRoom}/devices`);
+    roomRef.once('value').then(snapshot => {
+        const devices = snapshot.val() || {};
+        const deviceCountNum = Object.keys(devices).length;
+        
+        if (deviceCount && connectedDevices) {
+            connectedDevices.textContent = deviceCountNum;
+            deviceCount.style.display = deviceCountNum > 0 ? 'flex' : 'none';
+        }
+        
+        if (disconnectBtn) {
+            disconnectBtn.style.display = deviceCountNum > 0 ? 'block' : 'none';
+        }
+        
+        // Update device list
+        if (connectedDevicesList) {
+            connectedDevicesList.innerHTML = '';
+            connectedDevicesList.style.display = deviceCountNum > 0 ? 'block' : 'none';
+            
+            Object.entries(devices).forEach(([deviceId, deviceData]) => {
+                const deviceItem = document.createElement('div');
+                deviceItem.className = 'device-item';
+                
+                const deviceType = getDeviceType();
+                const isCurrentDevice = deviceId === window.firebaseSync.userId;
+                
+                deviceItem.innerHTML = `
+                    <div class="device-info">
+                        <i class="fas fa-${getDeviceIcon(deviceType)}"></i>
+                        <span>${isCurrentDevice ? 'This Device' : 'Other Device'}</span>
+                        <span class="device-type">${deviceType}</span>
+                    </div>
+                    <div class="device-actions">
+                        ${!isCurrentDevice ? `<button class="btn btn-danger btn-sm" onclick="disconnectDevice('${deviceId}')" title="Disconnect this device">
+                            <i class="fas fa-times"></i> Disconnect
+                        </button>` : ''}
+                    </div>
+                `;
+                
+                connectedDevicesList.appendChild(deviceItem);
+            });
+        }
+    });
+}
+
+// Get device type based on user agent
+function getDeviceType() {
+    const userAgent = navigator.userAgent;
+    if (/Mobile|Android|iPhone|iPad/.test(userAgent)) {
+        return /iPad/.test(userAgent) ? 'Tablet' : 'Mobile';
+    }
+    return 'Desktop';
+}
+
+// Get device icon based on type
+function getDeviceIcon(deviceType) {
+    switch (deviceType) {
+        case 'Mobile': return 'mobile-alt';
+        case 'Tablet': return 'tablet-alt';
+        case 'Desktop': return 'desktop';
+        default: return 'device';
+    }
+}
+
+// Disconnect specific device (admin function)
+function disconnectDevice(deviceId) {
+    if (!window.firebaseSync || !window.firebaseSync.currentRoom) return;
+    
+    const roomRef = window.firebaseSync.database.ref(`rooms/${window.firebaseSync.currentRoom}/devices/${deviceId}`);
+    roomRef.remove().then(() => {
+        showFeedback('disconnect-feedback', 'Device disconnected successfully', 'success');
+        updateDeviceList();
+    }).catch(error => {
+        showFeedback('disconnect-feedback', 'Failed to disconnect device: ' + error.message, 'error');
+    });
+}
+
 function showPerformanceDetail(performanceId) {
     const performance = window.db.getPerformanceById(performanceId);
     if (!performance) return;

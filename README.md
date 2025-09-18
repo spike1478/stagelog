@@ -29,6 +29,14 @@ A web app for tracking theatre shows because why not? Built with vanilla HTML, C
 - **Accessibility**: Because everyone should be able to track their theatre addiction
 - **Data Export**: Export your data so you don't lose your theatre history
 
+### 🔄 Device Sync (Because Sharing Is Caring)
+- **Multi-Device Sync**: Sync your data across multiple devices in real-time
+- **Room-Based System**: Create sync rooms with unique codes to connect devices
+- **Real-Time Updates**: Changes appear instantly on all connected devices
+- **Firebase Powered**: Secure, reliable cloud synchronization
+- **No Login Required**: Anonymous authentication for easy setup
+- **Privacy-First**: Use your own Firebase project for complete data control
+
 ### ♿ Accessibility Features (Because Theatre Should Be For Everyone)
 - **Access Schemes**: Track what accommodations work (or don't work) for you
 - **Universal Access**: Full keyboard navigation and screen reader compatibility
@@ -59,6 +67,104 @@ php -S localhost:8000
 ```
 
 Then open `http://localhost:8000` in your browser.
+
+## 🔥 Firebase Setup (Optional - For Device Sync)
+
+StageLog includes a device sync feature powered by Firebase. By default, it uses a shared Firebase project, but for maximum privacy and control, you can set up your own Firebase project.
+
+### Option 1: Use Default Firebase (Easiest)
+The app works out of the box with the included Firebase configuration. Your data is stored securely in the EU (Belgium) and automatically deleted when you disconnect from sync rooms.
+
+### Option 2: Set Up Your Own Firebase Project (Maximum Privacy)
+
+1. **Create a Firebase Project**:
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Click "Create a project"
+   - Choose a project name (e.g., "my-stagelog-sync")
+   - Enable Google Analytics (optional)
+
+2. **Set Up Realtime Database**:
+   - In your Firebase project, go to "Realtime Database"
+   - Click "Create Database"
+   - **Important**: Choose "europe-west1 (Belgium)" for EU data storage
+   - Start in "test mode" (we'll secure it later)
+
+3. **Get Your Configuration**:
+   - Go to Project Settings (gear icon) → General tab
+   - Scroll down to "Your apps" and click "Add app" → Web app
+   - Register your app with a nickname
+   - Copy the Firebase configuration object
+
+4. **Update StageLog Configuration**:
+   - Open `firebase-sync.js` in your StageLog folder
+   - Replace the `firebaseConfig` object with your own configuration:
+   ```javascript
+   this.firebaseConfig = {
+       apiKey: "your-api-key",
+       authDomain: "your-project.firebaseapp.com",
+       databaseURL: "https://your-project-default-rtdb.europe-west1.firebasedatabase.app",
+       projectId: "your-project-id",
+       storageBucket: "your-project.firebasestorage.app",
+       messagingSenderId: "your-sender-id",
+       appId: "your-app-id"
+   };
+   ```
+
+5. **Secure Your Database** (Important!):
+   - In Firebase Console → Realtime Database → Rules
+   - Replace the default rules with:
+   ```json
+   {
+     "rules": {
+       "rooms": {
+         "$roomId": {
+           ".read": "auth != null",
+           ".write": "auth != null"
+         }
+       }
+     }
+   }
+   ```
+
+6. **Enable Anonymous Authentication**:
+   - In Firebase Console → Authentication → Sign-in method
+   - Enable "Anonymous" authentication
+   - Save the changes
+
+### Privacy Benefits of Your Own Firebase Project:
+- **Complete Data Control**: Your data goes to your Firebase project only
+- **EU Data Storage**: Choose europe-west1 (Belgium) for GDPR compliance
+- **Custom Security Rules**: Set your own access controls
+- **No Shared Resources**: No dependency on the default Firebase project
+- **Full Transparency**: You can see exactly what data is stored and when
+
+## 🔒 Security & Privacy
+
+### What Data is Stored:
+- **Local Storage**: All your performance data is stored locally in your browser
+- **Firebase Sync**: Only temporary sync data (room codes, device IDs, performance data) during active sync sessions
+- **No Personal Information**: No names, emails, or personal details are ever stored
+- **Anonymous Authentication**: Firebase uses anonymous user IDs that cannot be traced back to you
+
+### Data Access Control:
+- **Local Data**: Only you can access data stored in your browser
+- **Sync Data**: Only devices with the correct room code can access sync data
+- **Automatic Cleanup**: Sync data is automatically deleted when you disconnect
+- **No Cross-Room Access**: Each sync room is completely isolated
+
+### Security Features:
+- **Anonymous Authentication**: No login required, no personal data collected
+- **Room-Based Isolation**: Each sync room is completely separate
+- **Temporary Storage**: Sync data is only stored during active sessions
+- **EU Data Storage**: All Firebase data stored in Belgium (europe-west1)
+- **No Server-Side Storage**: No data stored on StageLog servers (there aren't any!)
+
+### What's NOT Stored:
+- ❌ Personal information (names, emails, addresses)
+- ❌ Login credentials or passwords
+- ❌ Browsing history or tracking data
+- ❌ Analytics or usage statistics
+- ❌ Any data outside of your sync sessions
 
 ## 📱 Usage
 
@@ -108,15 +214,27 @@ stagelog/
 ├── index.html              # Main application file
 ├── styles.css              # All styling and theming
 ├── app-fixed.js            # Core application logic
+├── database.js             # Database functions and data management
+├── api.js                  # API functions and utilities
+├── firebase-sync.js        # Firebase real-time sync functionality
 ├── stats-system.js         # Analytics and statistics engine
 ├── analytics-functions.js  # Analytics page functions
-├── debug-system.js         # Advanced debugging tools
+├── csv-import.js           # CSV import functionality
+├── import-performances.js  # Performance import functions
+├── musical-database.js     # Musical database and show data
+├── restore-functions.js    # Data restore and backup functions
 ├── init-code.js            # Initialization code
+├── test-data.json          # Sample data for testing
 ├── backup.ps1              # Backup script
+├── docker-compose.yml      # Docker container setup
+├── nginx.conf              # Nginx configuration
+├── favicon.svg             # Site icon
 ├── README.md               # This file
 ├── LICENSE                 # MIT License
 ├── CONTRIBUTING.md         # Contribution guidelines
 ├── CHANGELOG.md            # Version history
+├── AI-DECLARATION.md       # AI usage transparency
+├── UNRAID-SETUP.md         # Unraid deployment guide
 └── docs/                   # Additional documentation
     ├── ACCESSIBILITY.md    # Accessibility compliance
     ├── GDPR.md            # Privacy compliance
@@ -155,7 +273,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎯 Roadmap (If We Feel Like It)
 
-- [ ] Device sync feature (for exactly 2 devices - coming soon!)
+- [x] Device sync feature (for multiple devices - completed!)
 - [ ] Maybe cloud sync (probably not)
 - [ ] Mobile app (if we get really bored)
 - [ ] Social features (because we need more drama in our lives)
@@ -177,4 +295,5 @@ This project was built with AI assistance because we're not coding gods. For ful
 
 **Made with ❤️ for theatre lovers everywhere**
 
-*StageLog v2.5.0 - Track your theatre journey, one performance at a time.*
+*StageLog v2.6.0 - Track your theatre journey, one performance at a time.*  
+*Last updated: September 18, 2025*

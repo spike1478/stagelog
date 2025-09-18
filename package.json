@@ -1,6 +1,6 @@
 {
   "name": "stagelog",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "A comprehensive web application for tracking theatre performances, ratings, expenses, and analytics",
   "main": "index.html",
   "scripts": {
@@ -51,15 +51,27 @@
     "index.html",
     "styles.css",
     "app-fixed.js",
+    "database.js",
+    "api.js",
+    "firebase-sync.js",
     "stats-system.js",
     "analytics-functions.js",
-    "debug-system.js",
+    "csv-import.js",
+    "import-performances.js",
+    "musical-database.js",
+    "restore-functions.js",
     "init-code.js",
+    "test-data.json",
+    "backup.ps1",
     "README.md",
     "LICENSE",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
-    "AI-DECLARATION.md"
+    "AI-DECLARATION.md",
+    "UNRAID-SETUP.md",
+    "docker-compose.yml",
+    "nginx.conf",
+    "favicon.svg"
   ],
   "devDependencies": {
     "serve": "^14.2.0"
