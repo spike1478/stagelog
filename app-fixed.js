@@ -3209,7 +3209,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Form submit event triggered');
                 e.preventDefault();
                 console.log('Calling savePerformance...');
-                window.app.savePerformance();
+                try {
+                    window.app.savePerformance();
+                } catch (error) {
+                    console.error('Error in savePerformance:', error);
+                    alert('Error saving performance: ' + error.message);
+                }
             });
         } else {
             console.error('Performance form not found!');
