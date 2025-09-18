@@ -1960,13 +1960,21 @@ class StageLogApp {
          experienceGroups.forEach(groupId => {
              const group = document.getElementById(groupId);
              if (group) {
+                 const select = group.querySelector('select');
                  if (productionType === 'Pro Shot') {
                      group.classList.add('pro-shot-hidden');
                      // Clear the rating for Pro Shot
-                     const select = group.querySelector('select');
-                     if (select) select.value = '';
+                     if (select) {
+                         select.value = '';
+                         // Remove required attribute for Pro Shot
+                         select.removeAttribute('required');
+                     }
                  } else {
                      group.classList.remove('pro-shot-hidden');
+                     // Add required attribute back for non-Pro Shot
+                     if (select) {
+                         select.setAttribute('required', 'required');
+                     }
                  }
              }
          });
