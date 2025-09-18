@@ -3259,6 +3259,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Error saving performance: ' + error.message);
                 }
             });
+            
+            // Also add click listener to the submit button as backup
+            const submitButton = document.querySelector('#performance-form .btn-primary');
+            if (submitButton) {
+                console.log('✅ Submit button found, adding click listener as backup');
+                submitButton.addEventListener('click', (e) => {
+                    console.log('🖱️ SUBMIT BUTTON CLICKED');
+                    console.log('Button element:', e.target);
+                    console.log('Button type:', e.target.type);
+                    
+                    // If it's not a submit button, manually trigger form submission
+                    if (e.target.type !== 'submit') {
+                        console.log('⚠️ Button is not type="submit", manually triggering form submission');
+                        e.preventDefault();
+                        performanceForm.dispatchEvent(new Event('submit'));
+                    }
+                });
+            } else {
+                console.error('❌ Submit button not found!');
+            }
         } else {
             console.error('❌ Performance form not found!');
         }
