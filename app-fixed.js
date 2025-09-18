@@ -1661,16 +1661,21 @@ class StageLogApp {
 
     // Edit and delete functionality
     editPerformance(performanceId) {
+        console.log('🔧 === EDIT PERFORMANCE CALLED ===');
+        console.log('🔧 Performance ID:', performanceId);
+        
         const performance = window.db.getPerformanceById(performanceId);
         if (!performance) {
+            console.error('❌ Performance not found for ID:', performanceId);
             this.showMessage('Performance not found!', 'error');
             return;
         }
 
-        console.log('Editing performance:', performanceId, performance);
+        console.log('✅ Performance found:', performance);
         
         // Store the editing ID
         this.editingPerformanceId = performanceId;
+        console.log('🔧 Set editingPerformanceId to:', this.editingPerformanceId);
         
         // Switch to add-performance page
         switchPage('add-performance');
@@ -1688,8 +1693,18 @@ class StageLogApp {
             // Update page title and button
             const pageTitle = document.querySelector('#add-performance h2');
             const submitButton = document.querySelector('#add-performance .btn-primary');
-            if (pageTitle) pageTitle.textContent = 'Edit Performance';
-            if (submitButton) submitButton.textContent = 'Update Performance';
+            console.log('🔧 Page title element:', pageTitle);
+            console.log('🔧 Submit button element:', submitButton);
+            if (pageTitle) {
+                pageTitle.textContent = 'Edit Performance';
+                console.log('✅ Updated page title to "Edit Performance"');
+            }
+            if (submitButton) {
+                submitButton.textContent = 'Update Performance';
+                console.log('✅ Updated button text to "Update Performance"');
+            } else {
+                console.error('❌ Submit button not found!');
+            }
             
             // Find and select the show
             if (show) {
@@ -2113,8 +2128,10 @@ class StageLogApp {
 
     // Form handling
     savePerformance() {
-        console.log('=== SAVE PERFORMANCE CALLED ===');
-        console.log('Current show:', this.currentShow);
+        console.log('🎭 === SAVE PERFORMANCE FUNCTION CALLED ===');
+        console.log('🎭 Current show:', this.currentShow);
+        console.log('🎭 Editing performance ID:', this.editingPerformanceId);
+        console.log('🎭 Function context (this):', this);
         
         if (!this.currentShow) {
             console.log('No show selected, showing error message');
@@ -3204,20 +3221,39 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set up form submission
         const performanceForm = document.getElementById('performance-form');
         if (performanceForm) {
-            console.log('Form found, adding submit listener');
+            console.log('✅ Form found, adding submit listener');
             performanceForm.addEventListener('submit', (e) => {
-                console.log('Form submit event triggered');
+                console.log('🔥 FORM SUBMIT EVENT TRIGGERED');
+                console.log('Event details:', e);
                 e.preventDefault();
-                console.log('Calling savePerformance...');
+                console.log('🔄 Calling savePerformance...');
+                console.log('window.app exists:', !!window.app);
+                console.log('window.app.savePerformance exists:', !!(window.app && window.app.savePerformance));
+                
+                if (!window.app) {
+                    console.error('❌ window.app is not defined!');
+                    alert('Error: App not initialized. Please refresh the page.');
+                    return;
+                }
+                
+                if (!window.app.savePerformance) {
+                    console.error('❌ window.app.savePerformance is not defined!');
+                    alert('Error: Save function not available. Please refresh the page.');
+                    return;
+                }
+                
                 try {
+                    console.log('🚀 About to call savePerformance...');
                     window.app.savePerformance();
+                    console.log('✅ savePerformance call completed');
                 } catch (error) {
-                    console.error('Error in savePerformance:', error);
+                    console.error('❌ Error in savePerformance:', error);
+                    console.error('Error stack:', error.stack);
                     alert('Error saving performance: ' + error.message);
                 }
             });
         } else {
-            console.error('Performance form not found!');
+            console.error('❌ Performance form not found!');
         }
         
         // Set up show search
