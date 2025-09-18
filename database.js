@@ -204,6 +204,7 @@ class StageLogDB {
     updatePerformance(id, performanceData) {
         const performances = this.getPerformances();
         const index = performances.findIndex(p => p.id === id);
+        
         if (index !== -1) {
             performances[index] = {
                 ...performances[index],
