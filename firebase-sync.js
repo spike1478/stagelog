@@ -12,6 +12,7 @@ class FirebaseSync {
         this.database = null;
         this.auth = null;
         this.syncListeners = [];
+        this.heartbeatInterval = null;
         
         // Firebase configuration
         this.firebaseConfig = {
@@ -200,27 +201,54 @@ class FirebaseSync {
     }
 
     setupRoomListeners(roomCode) {
+        // Clean up any existing listeners first
+        this.cleanupListeners();
+        
         // Listen for data changes
         const dataRef = this.database.ref(`rooms/${roomCode}/data`);
-        dataRef.on('value', (snapshot) => {
+        const dataListener = dataRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 this.handleDataUpdate(snapshot.val());
             }
         });
+        this.syncListeners.push({ ref: dataRef, listener: dataListener });
         
         // Listen for device updates
         const devicesRef = this.database.ref(`rooms/${roomCode}/devices`);
-        devicesRef.on('value', (snapshot) => {
+        const devicesListener = devicesRef.on('value', (snapshot) => {
             this.handleDeviceUpdate(snapshot.val());
         });
+        this.syncListeners.push({ ref: devicesRef, listener: devicesListener });
         
         // Update last seen timestamp periodically
-        setInterval(() => {
+        this.heartbeatInterval = setInterval(() => {
             if (this.currentRoom) {
                 this.database.ref(`rooms/${this.currentRoom}/devices/${this.userId}/lastSeen`)
                     .set(firebase.database.ServerValue.TIMESTAMP);
             }
         }, 30000); // Every 30 seconds
+        
+        console.log('🔥 Room listeners setup for room:', roomCode);
+    }
+
+    cleanupListeners() {
+        // Clear Firebase event listeners
+        this.syncListeners.forEach(({ ref, listener }) => {
+            try {
+                ref.off('value', listener);
+            } catch (error) {
+                console.warn('🔥 Error removing listener:', error);
+            }
+        });
+        this.syncListeners = [];
+        
+        // Clear heartbeat interval
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+        }
+        
+        console.log('🔥 Listeners cleaned up');
     }
 
     async uploadData() {
@@ -346,9 +374,8 @@ class FirebaseSync {
                 this.currentRoom = null;
             }
             
-            // Clear listeners
-            this.syncListeners.forEach(listener => listener.off());
-            this.syncListeners = [];
+            // Clear listeners and intervals
+            this.cleanupListeners();
             
             console.log('🔥 Disconnected from sync');
             this.updateSyncStatus('disconnected', 'Disconnected');
@@ -399,4 +426,30 @@ document.addEventListener('DOMContentLoaded', () => {
     window.firebaseSync.init().then(() => {
         window.firebaseSync.setupAutoSync();
     });
+});
+
+// Clean up on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+    if (window.firebaseSync) {
+        window.firebaseSync.cleanupListeners();
+    }
+});
+
+// Clean up on page visibility change (when tab becomes hidden)
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && window.firebaseSync) {
+        // Pause heartbeat when tab is hidden to save resources
+        if (window.firebaseSync.heartbeatInterval) {
+            clearInterval(window.firebaseSync.heartbeatInterval);
+            window.firebaseSync.heartbeatInterval = null;
+        }
+    } else if (!document.hidden && window.firebaseSync && window.firebaseSync.currentRoom) {
+        // Resume heartbeat when tab becomes visible again
+        window.firebaseSync.heartbeatInterval = setInterval(() => {
+            if (window.firebaseSync.currentRoom) {
+                window.firebaseSync.database.ref(`rooms/${window.firebaseSync.currentRoom}/devices/${window.firebaseSync.userId}/lastSeen`)
+                    .set(firebase.database.ServerValue.TIMESTAMP);
+            }
+        }, 30000);
+    }
 });
