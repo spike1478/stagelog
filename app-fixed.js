@@ -1757,8 +1757,12 @@ class StageLogApp {
                 const element = document.getElementById(fieldId);
                 const ratingKey = fieldId.replace(/-/g, '_'); // Replace ALL hyphens with underscores
                 if (element && performance.rating[ratingKey] !== undefined) {
-                    const ratingValue = performance.rating[ratingKey];
-                    console.log(`Setting ${fieldId} to ${ratingValue}`);
+                    let ratingValue = performance.rating[ratingKey];
+                    
+                    // If rating is 0, set to 1 (minimum valid rating) for editing
+                    if (ratingValue === 0) {
+                        ratingValue = 1;
+                    }
                     
                     // Set the value directly
                     element.value = ratingValue;
@@ -1977,8 +1981,10 @@ class StageLogApp {
          if (musicGroup && musicSelect) {
              if (!isMusical) {
                  musicGroup.classList.add('non-musical-hidden');
-                 // Clear the music rating for non-musicals
-                 musicSelect.value = '';
+                 // Only clear the music rating for non-musicals if we're not editing an existing performance
+                 if (!this.editingPerformanceId) {
+                     musicSelect.value = '';
+                 }
                  // Remove required attribute for non-musicals
                  musicSelect.removeAttribute('required');
                  console.log('✅ Removed required attribute from music-songs (non-musical)');
@@ -2208,21 +2214,21 @@ class StageLogApp {
              ratings: rating
          });
          
-         // Validate ratings (only required for past performances)
-         if (!isFuturePerformance) {
-             const requiredRatings = ['music_songs', 'story_plot', 'performance_cast', 'stage_visuals', 'rewatch_value'];
-             for (const ratingType of requiredRatings) {
-                 const ratingValue = rating[ratingType];
-                 if (ratingValue === 0) {
-                     this.showMessage(`Please provide a rating for ${ratingType.replace('_', ' ')} for past performances.`, 'error');
-                     return;
-                 }
-                 if (ratingValue > 0 && (ratingValue < 0.25 || ratingValue > 5.0)) {
-                     this.showMessage(`Please provide a valid rating for ${ratingType.replace('_', ' ')} (0.25 - 5.0).`, 'error');
-                     return;
-                 }
-             }
-         } else {
+        // Validate ratings (only required for past performances)
+        if (!isFuturePerformance) {
+            const requiredRatings = ['music_songs', 'story_plot', 'performance_cast', 'stage_visuals', 'rewatch_value'];
+            for (const ratingType of requiredRatings) {
+                const ratingValue = rating[ratingType];
+                if (ratingValue === 0) {
+                    this.showMessage(`Please provide a rating for ${ratingType.replace('_', ' ')} for past performances.`, 'error');
+                    return;
+                }
+                if (ratingValue > 0 && (ratingValue < 0.25 || ratingValue > 5.0)) {
+                    this.showMessage(`Please provide a valid rating for ${ratingType.replace('_', ' ')} (0.25 - 5.0).`, 'error');
+                    return;
+                }
+            }
+        } else {
              // For future performances, just validate range if ratings are provided
              const allRatings = ['music_songs', 'story_plot', 'performance_cast', 'stage_visuals', 'rewatch_value'];
              if (productionTypeField.value !== 'Pro Shot') {
@@ -2274,14 +2280,14 @@ class StageLogApp {
             }
             
             // Refresh analytics automatically
-            console.log('🔄 Auto-refreshing analytics after save...');
             this.loadAnalytics();
             
             this.resetForm();
             switchPage('dashboard');
         } catch (error) {
-            console.error('Error saving performance:', error);
-            this.showMessage('Error saving performance. Please try again.', 'error');
+            console.error('❌ Error saving performance:', error);
+            console.error('❌ Error stack:', error.stack);
+            this.showMessage('Error saving performance: ' + error.message, 'error');
         }
     }
 
