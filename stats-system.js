@@ -27,13 +27,27 @@ class StatsSystem {
 
     async loadData() {
         try {
-            // Load performances - try multiple possible keys
+            // Load performances - only from performance-specific keys
             let performancesData = localStorage.getItem('stagelog_performances') || 
-                                  localStorage.getItem('performances') || 
-                                  localStorage.getItem('stagelog_shows');
+                                  localStorage.getItem('performances');
             
             if (performancesData) {
-                this.data.performances = JSON.parse(performancesData);
+                const parsedData = JSON.parse(performancesData);
+                // Validate that we have actual performance records, not show records
+                if (Array.isArray(parsedData) && parsedData.length > 0) {
+                    // Check if the first item has performance-specific fields
+                    const firstItem = parsedData[0];
+                    if (firstItem.hasOwnProperty('date_seen') || firstItem.hasOwnProperty('show_id')) {
+                        this.data.performances = parsedData;
+                    } else {
+                        console.warn('📊 Data appears to be show records, not performance records. Skipping.');
+                        this.data.performances = [];
+                    }
+                } else {
+                    this.data.performances = [];
+                }
+            } else {
+                this.data.performances = [];
             }
 
             // Load shows - try multiple possible keys
@@ -81,10 +95,25 @@ class StatsSystem {
 
     calculateOverviewStats() {
         const performances = this.data.performances;
+        
+        // Validate that we have actual performance records
+        if (!Array.isArray(performances) || performances.length === 0) {
+            return {
+                totalShows: 0,
+                totalSpent: 0,
+                avgRating: 0,
+                avgShowsPerMonth: 0,
+                dateRange: { start: null, end: null }
+            };
+        }
+        
         const totalShows = performances.length;
         
         // Calculate total spent using the correct field names
         const totalSpent = performances.reduce((sum, p) => {
+            // Validate that p is an object with the expected fields
+            if (!p || typeof p !== 'object') return sum;
+            
             const ticketPrice = parseFloat(p.ticket_price) || 0;
             const bookingFee = parseFloat(p.booking_fee) || 0;
             const travelCost = parseFloat(p.travel_cost) || 0;
@@ -93,12 +122,19 @@ class StatsSystem {
         }, 0);
         
         // Calculate average rating using weighted_rating field
-        const ratings = performances.map(p => parseFloat(p.weighted_rating) || 0).filter(r => r > 0);
+        const ratings = performances
+            .filter(p => p && typeof p === 'object') // Validate object structure
+            .map(p => parseFloat(p.weighted_rating) || 0)
+            .filter(r => r > 0 && !isNaN(r)); // Filter out NaN values
         const avgRating = ratings.length > 0 ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length) : 0;
         
         // Date range - only count past shows for frequency calculation
         const today = new Date();
-        const pastPerformances = performances.filter(p => new Date(p.date_seen) <= today);
+        const pastPerformances = performances.filter(p => {
+            if (!p || typeof p !== 'object' || !p.date_seen) return false;
+            const date = new Date(p.date_seen);
+            return !isNaN(date) && date <= today;
+        });
         const dates = pastPerformances.map(p => new Date(p.date_seen)).filter(d => !isNaN(d)).sort();
         const firstShow = dates[0];
         const lastShow = dates[dates.length - 1];
