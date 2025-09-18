@@ -6,6 +6,10 @@
     <title>StageLog - Theatre Performance Tracker</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <!-- Export/Import functionality -->
 </head>
 <body>
@@ -36,6 +40,10 @@
                 <button class="nav-btn" data-page="access-schemes">
                     <i class="fas fa-universal-access"></i>
                     Access Schemes
+                </button>
+                <button class="nav-btn" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    Settings
                 </button>
             </div>
             <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode" aria-label="Toggle theme">
@@ -784,23 +792,182 @@
                     <select id="location-filter">
                         <option value="">All Locations</option>
                     </select>
-                    <button class="btn btn-secondary" onclick="refreshAccessData()">
-                        <i class="fas fa-refresh"></i> Refresh Data
-                    </button>
-                    <button class="btn btn-primary" onclick="exportData()" title="Export your data as JSON">
-                        <i class="fas fa-download"></i> Export Data
-                    </button>
-                    <button class="btn btn-secondary" onclick="showRestoreModal()" title="Restore data from backup">
-                        <i class="fas fa-upload"></i> Restore Data
-                    </button>
-                    <button class="btn btn-secondary" onclick="showImportModal()" title="Import data from JSON file">
-                        <i class="fas fa-file-import"></i> Import JSON
-                    </button>
                 </div>
             </div>
 
             <div id="access-schemes-list" class="access-schemes-list">
                 <!-- Access schemes will be populated here -->
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings" class="page">
+            <div class="page-header">
+                <h2>Settings</h2>
+                <p>Manage your data, sync settings, and application preferences</p>
+            </div>
+
+            <div class="settings-container">
+                <!-- Data Management Section -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-database"></i> Data Management</h3>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Export Data</h4>
+                                <p>Download all your performances, shows, and access schemes as a JSON file</p>
+                                <div class="setting-actions">
+                                    <button class="btn btn-primary" onclick="exportDataWithFeedback()" title="Export your data as JSON">
+                                        <i class="fas fa-download"></i> Export Data
+                                    </button>
+                                    <div class="action-feedback" id="export-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-upload"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Restore Data</h4>
+                                <p>Restore your data from a previously exported backup file</p>
+                                <div class="setting-actions">
+                                    <button class="btn btn-secondary" onclick="showRestoreModal()" title="Restore data from backup">
+                                        <i class="fas fa-upload"></i> Restore Data
+                                    </button>
+                                    <div class="action-feedback" id="restore-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Import Data</h4>
+                                <p>Import data from a JSON file (useful for testing with sample data)</p>
+                                <div class="setting-actions">
+                                    <button class="btn btn-secondary" onclick="showImportModal()" title="Import data from JSON file">
+                                        <i class="fas fa-file-import"></i> Import JSON
+                                    </button>
+                                    <div class="action-feedback" id="import-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-refresh"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Refresh Data</h4>
+                                <p>Reload all data from local storage (useful if data seems out of sync)</p>
+                                <div class="setting-actions">
+                                    <button class="btn btn-secondary" onclick="refreshAccessDataWithFeedback()">
+                                        <i class="fas fa-refresh"></i> Refresh Data
+                                    </button>
+                                    <div class="action-feedback" id="refresh-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Device Sync Section -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-sync-alt"></i> Device Sync</h3>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Device Sync</h4>
+                                <p>Sync your data across multiple devices in real-time using Firebase</p>
+                                <div class="sync-status-info" id="sync-status-info">
+                                    <div class="sync-indicator">
+                                        <i class="fas fa-circle" id="sync-status-icon"></i>
+                                        <span id="sync-status-text">Not connected</span>
+                                    </div>
+                                    <div class="device-count" id="device-count" style="display: none;">
+                                        <i class="fas fa-users"></i>
+                                        <span id="connected-devices">0</span> devices connected
+                                    </div>
+                                    <div class="connected-devices-list" id="connected-devices-list" style="display: none;">
+                                        <!-- Device list will be populated here -->
+                                    </div>
+                                </div>
+                                <div class="setting-actions">
+                                    <button class="btn btn-primary" onclick="showSyncModal()" title="Sync with other devices">
+                                        <i class="fas fa-sync-alt"></i> Device Sync
+                                    </button>
+                                    <button class="btn btn-danger" onclick="disconnectSyncFromSettings()" id="disconnect-btn" style="display: none;" title="Disconnect from sync">
+                                        <i class="fas fa-times"></i> Disconnect
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-chart-bar"></i> Analytics</h3>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Refresh Analytics</h4>
+                                <p>Update analytics data with the latest performance information</p>
+                                <div class="setting-actions">
+                                    <button class="btn btn-secondary" onclick="refreshStatsWithFeedback()" title="Refresh analytics data">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                    <div class="action-feedback" id="analytics-refresh-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Export Analytics</h4>
+                                <p>Download analytics data as a JSON file for external analysis</p>
+                                <button class="btn btn-secondary" onclick="exportStats('json')" title="Export stats as JSON">
+                                    <i class="fas fa-download"></i> Export JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- App Preferences Section -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-cog"></i> App Preferences</h3>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-moon"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Theme</h4>
+                                <p>Switch between light and dark mode</p>
+                                <button class="btn btn-secondary" onclick="toggleTheme()" title="Toggle Dark Mode">
+                                    <i class="fas fa-moon" id="settings-theme-icon"></i> Toggle Theme
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -818,15 +985,84 @@
         </div>
     </div>
 
+    <!-- Sync Modal -->
+    <div id="sync-modal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Device Sync</h2>
+                <span class="modal-close" onclick="closeSyncModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="sync-status" class="sync-status">
+                    <div class="sync-indicator">
+                        <i class="fas fa-circle" id="sync-status-icon"></i>
+                        <span id="sync-status-text">Connecting...</span>
+                    </div>
+                </div>
+                
+                <div id="sync-setup" class="sync-setup">
+                    <h3>Set Up Sync</h3>
+                    <p>Choose how you want to sync with other devices:</p>
+                    
+                    <div class="sync-options">
+                        <button class="btn btn-primary" onclick="createSyncRoom()">
+                            <i class="fas fa-plus"></i> Create Sync Room
+                        </button>
+                        <button class="btn btn-secondary" onclick="showJoinRoom()">
+                            <i class="fas fa-sign-in-alt"></i> Join Existing Room
+                        </button>
+                    </div>
+                </div>
+
+                <div id="sync-room-created" class="sync-room-created hidden">
+                    <h3>Sync Room Created!</h3>
+                    <p>Share this code with your other devices:</p>
+                    <div class="room-code">
+                        <input type="text" id="room-code-display" readonly>
+                        <button class="btn btn-secondary" onclick="copyRoomCode()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <p class="sync-instructions">
+                        On your other devices, open StageLog and click "Join Existing Room", then enter this code.
+                    </p>
+                </div>
+
+                <div id="sync-join-room" class="sync-join-room hidden">
+                    <h3>Join Sync Room</h3>
+                    <p>Enter the room code from another device:</p>
+                    <div class="room-code-input">
+                        <input type="text" id="room-code-input" placeholder="Enter room code" maxlength="15">
+                        <button class="btn btn-primary" onclick="joinSyncRoom()">
+                            <i class="fas fa-sign-in-alt"></i> Join
+                        </button>
+                    </div>
+                </div>
+
+                <div id="sync-active" class="sync-active hidden">
+                    <h3>Sync Active</h3>
+                    <p>All devices in this room are now syncing automatically!</p>
+                    <div class="sync-info">
+                        <p><strong>Room Code:</strong> <span id="active-room-code"></span></p>
+                        <p><strong>Last Sync:</strong> <span id="last-sync-time"></span></p>
+                    </div>
+                    <button class="btn btn-danger" onclick="disconnectSync()">
+                        <i class="fas fa-times"></i> Disconnect
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="database.js"></script>
     <script src="api.js"></script>
     <script src="csv-import.js"></script>
     <script src="import-performances.js"></script>
     <script src="musical-database.js"></script>
     <script src="restore-functions.js"></script>
-    <script src="debug-system.js"></script>
     <script src="stats-system.js"></script>
     <script src="analytics-functions.js"></script>
+    <script src="firebase-sync.js"></script>
     <script src="app-fixed.js"></script>
     <script src="init-code.js"></script>
 </body>

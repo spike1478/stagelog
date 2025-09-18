@@ -21,6 +21,9 @@ This project was developed with the assistance of artificial intelligence tools.
 - **Accessibility Compliance**: AI help implementing WCAG 2.2 AA standards
 - **Data Management**: AI assistance with localStorage operations and data persistence
 - **User Interface**: AI help with responsive design and user experience improvements
+- **Device Sync System**: AI assistance implementing Firebase real-time synchronization
+- **Musical/Non-Musical Rating System**: AI help developing adaptive rating algorithms
+- **Settings Management**: AI assistance creating dedicated settings page and controls
 
 ### Documentation
 - **README.md**: AI assistance with comprehensive documentation
@@ -77,6 +80,6 @@ For questions about AI usage in this project, please open an issue or contact th
 
 ---
 
-**Last Updated**: September 3, 2024  
-**Version**: 2.5.0  
-**AI Declaration Version**: 1.0
+**Last Updated**: September 18, 2025  
+**Version**: 2.6.0  
+**AI Declaration Version**: 1.1
