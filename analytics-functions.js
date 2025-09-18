@@ -213,12 +213,23 @@ function updateTopVenues(venues) {
     if (!container || !venues) return;
     
     const topVenues = venues.slice(0, 5);
-    container.innerHTML = topVenues.map(venue => `
-        <div class="venue-item">
-            <div class="venue-name">${venue.venue}</div>
-            <div class="venue-count">${venue.count}</div>
+    
+    // Generate alternative text description for screen readers
+    const venuesText = topVenues.map((venue, index) => 
+        `${index + 1}. ${venue.venue} with ${venue.count} performances`
+    ).join(', ');
+    
+    container.innerHTML = `
+        <div class="sr-only" aria-live="polite" id="top-venues-description">
+            Top venues: ${venuesText}.
         </div>
-    `).join('');
+        ${topVenues.map(venue => `
+            <div class="venue-item" role="listitem" aria-label="${venue.venue}: ${venue.count} performances">
+                <div class="venue-name">${venue.venue}</div>
+                <div class="venue-count">${venue.count}</div>
+            </div>
+        `).join('')}
+    `;
 }
 
 /**
@@ -229,12 +240,23 @@ function updateTopShows(shows) {
     if (!container || !shows) return;
     
     const topShows = shows.slice(0, 5);
-    container.innerHTML = topShows.map(show => `
-        <div class="show-item">
-            <div class="show-name">${show.show}</div>
-            <div class="show-count">${show.count}</div>
+    
+    // Generate alternative text description for screen readers
+    const showsText = topShows.map((show, index) => 
+        `${index + 1}. ${show.show} with ${show.count} performances`
+    ).join(', ');
+    
+    container.innerHTML = `
+        <div class="sr-only" aria-live="polite" id="top-shows-description">
+            Top shows: ${showsText}.
         </div>
-    `).join('');
+        ${topShows.map(show => `
+            <div class="show-item" role="listitem" aria-label="${show.show}: ${show.count} performances">
+                <div class="show-name">${show.show}</div>
+                <div class="show-count">${show.count}</div>
+            </div>
+        `).join('')}
+    `;
 }
 
 /**
@@ -283,6 +305,30 @@ function updateComparisonStats(comparisons) {
         if (spendingChangeEl) spendingChangeEl.textContent = formatChange(comparisons.yearOverYear.spendingChange || '0');
         if (ratingChangeEl) ratingChangeEl.textContent = formatChange(comparisons.yearOverYear.ratingChange || '0');
     }
+    
+    // Add alternative text description for the entire comparison section
+    const comparisonContainer = document.querySelector('.comparison-section');
+    if (comparisonContainer && !comparisonContainer.querySelector('.sr-only')) {
+        const thisYear = comparisons.thisYear || {};
+        const lastYear = comparisons.previousYear || {};
+        const changes = comparisons.yearOverYear || {};
+        
+        const formatChange = (change) => {
+            if (change === 'Infinity' || change === 'NaN') return 'N/A';
+            const num = parseFloat(change);
+            if (num > 1000) return '1000%+';
+            return `${change}%`;
+        };
+        
+        const comparisonText = `Year-over-year comparison: This year ${thisYear.count || 0} performances, £${thisYear.totalSpent || '0.00'} spent, ${thisYear.avgRating || '0.0'} average rating. Last year ${lastYear.count || 0} performances, £${lastYear.totalSpent || '0.00'} spent, ${lastYear.avgRating || '0.0'} average rating. Changes: ${formatChange(changes.showsChange || '0')} performances, ${formatChange(changes.spendingChange || '0')} spending, ${formatChange(changes.ratingChange || '0')} rating.`;
+        
+        const altTextDiv = document.createElement('div');
+        altTextDiv.className = 'sr-only';
+        altTextDiv.setAttribute('aria-live', 'polite');
+        altTextDiv.id = 'comparison-description';
+        altTextDiv.textContent = comparisonText;
+        comparisonContainer.appendChild(altTextDiv);
+    }
 }
 
 /**
@@ -298,20 +344,32 @@ function updateRatingDistribution(ratings) {
         return;
     }
     
-    container.innerHTML = [5, 4, 3, 2, 1].map(rating => {
+    // Generate alternative text description for screen readers
+    const distributionText = [5, 4, 3, 2, 1].map(rating => {
         const count = ratings.distribution[rating] || 0;
         const percentage = total > 0 ? (count / total) * 100 : 0;
-        
-        return `
-            <div class="rating-bar">
-                <div class="rating-label">${rating} ⭐</div>
-                <div class="rating-progress">
-                    <div class="rating-fill" style="width: ${percentage}%"></div>
+        return `${count} performances rated ${rating} stars (${percentage.toFixed(1)}%)`;
+    }).join(', ');
+    
+    container.innerHTML = `
+        <div class="sr-only" aria-live="polite" id="rating-distribution-description">
+            Rating distribution: ${distributionText}. Total performances rated: ${total}.
+        </div>
+        ${[5, 4, 3, 2, 1].map(rating => {
+            const count = ratings.distribution[rating] || 0;
+            const percentage = total > 0 ? (count / total) * 100 : 0;
+            
+            return `
+                <div class="rating-bar" role="img" aria-label="${count} performances rated ${rating} stars, ${percentage.toFixed(1)}% of total">
+                    <div class="rating-label">${rating} ⭐</div>
+                    <div class="rating-progress">
+                        <div class="rating-fill" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="rating-count">${count}</div>
                 </div>
-                <div class="rating-count">${count}</div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('')}
+    `;
 }
 
 /**
@@ -335,18 +393,30 @@ function updatePriceAnalysis(spending) {
         { label: 'Over £100', key: 'over100', icon: '💎' }
     ];
     
-    container.innerHTML = ranges.map(range => {
+    // Generate alternative text description for screen readers
+    const priceAnalysisText = ranges.map(range => {
         const count = spending.ranges[range.key] || 0;
         const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-        
-        return `
-            <div class="price-range-card">
-                <div class="price-range-label">${range.icon} ${range.label}</div>
-                <div class="price-range-count">${count}</div>
-                <div class="price-range-percentage">${percentage}%</div>
-            </div>
-        `;
-    }).join('');
+        return `${count} performances in ${range.label} range (${percentage}%)`;
+    }).join(', ');
+    
+    container.innerHTML = `
+        <div class="sr-only" aria-live="polite" id="price-analysis-description">
+            Price range analysis: ${priceAnalysisText}. Total performances with cost data: ${total}.
+        </div>
+        ${ranges.map(range => {
+            const count = spending.ranges[range.key] || 0;
+            const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+            
+            return `
+                <div class="price-range-card" role="img" aria-label="${count} performances in ${range.label} price range, ${percentage}% of total">
+                    <div class="price-range-label">${range.icon} ${range.label}</div>
+                    <div class="price-range-count">${count}</div>
+                    <div class="price-range-percentage">${percentage}%</div>
+                </div>
+            `;
+        }).join('')}
+    `;
 }
 
 /**

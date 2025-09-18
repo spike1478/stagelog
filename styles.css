@@ -1,3 +1,12 @@
+/* Responsive Design - Prevent horizontal scrolling */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
 /* CSS Custom Properties for Theming */
 :root {
     --primary-color: #5668e6; /* slightly deeper for contrast */
@@ -18,15 +27,15 @@
 
 /* Dark Mode Theme */
 [data-theme="dark"] {
-    --primary-color: #9a6af8; /* brighten for dark bg */
-    --primary-dark: #8657ef;
-    --secondary-color: #b091fc;
+    --primary-color: #a78bfa; /* improved contrast - lighter purple */
+    --primary-dark: #8b5cf6; /* improved contrast - darker purple */
+    --secondary-color: #c4b5fd; /* improved contrast - lighter violet */
     --bg-color: #0f1623; /* slightly brighter than #111827 */
     --bg-secondary: #182133; /* improves 3:1 on borders */
     --text-color: #f3f4f6;
     --text-muted: #e5e7eb; /* ensure readable muted */
     --border-color: #2b3446;
-    --accent-color: #8b5cf6;
+    --accent-color: #a78bfa; /* improved contrast - lighter purple */
     --card-shadow: 0 2px 10px rgba(0,0,0,0.5);
     --card-shadow-hover: 0 4px 20px rgba(0,0,0,0.6);
     --success-color: #10b981;
@@ -166,31 +175,56 @@ body {
 }
 .skip-link:focus-visible { left: 16px; top: 16px; outline: none; }
 
-/* Accessible focus styles */
+/* Accessible focus styles - WCAG 2.1 AA compliant */
 :focus-visible {
     outline: 3px solid var(--primary-color);
     outline-offset: 2px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.3);
+}
+
+/* Enhanced focus styles for dark mode - stronger contrast */
+[data-theme="dark"] :focus-visible {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.4), 0 0 0 4px rgba(167,139,250,0.3);
 }
 
 /* Remove default outline only when we provide a visible replacement */
+/* Enhanced button focus styles */
 button:focus { outline: none; }
-button:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.45); }
+button:focus-visible { 
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.6), 0 0 0 1px rgba(255,255,255,0.3);
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+}
 
 a:focus { outline: none; }
-a:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.45); border-radius: 4px; }
+a:focus-visible { 
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.6), 0 0 0 1px rgba(255,255,255,0.3);
+    border-radius: 4px;
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+}
 
 input:focus { outline: none; }
 input:focus-visible, select:focus-visible, textarea:focus-visible {
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.45);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.6), 0 0 0 1px rgba(255,255,255,0.3);
     border-color: var(--primary-color);
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
 }
 
+/* Enhanced navigation button focus styles */
 .nav-btn:focus-visible, .btn:focus-visible, .nav-btn.active:focus-visible {
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.6), 0 0 0 5px rgba(139, 92, 246, 0.55);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.8), 0 0 0 5px rgba(139, 92, 246, 0.7);
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
 }
 
 [data-theme="dark"] .nav-btn:focus-visible, [data-theme="dark"] .btn:focus-visible {
-    box-shadow: 0 0 0 3px rgba(15,22,35,0.9), 0 0 0 5px rgba(154,106,248,0.75);
+    box-shadow: 0 0 0 3px rgba(15,22,35,0.95), 0 0 0 5px rgba(167,139,250,0.95), 0 0 0 7px rgba(255,255,255,0.2);
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
 }
 
 /* Navigation */
@@ -254,25 +288,30 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 
 .nav-links {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.2rem; /* Even smaller gap */
     flex: 1;
     justify-content: center;
-    margin: 0 1rem;
+    margin: 0 0.5rem; /* Reduced margin */
+    flex-wrap: wrap; /* Allow wrapping if needed */
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
 }
 
 .nav-btn {
     background: rgba(255,255,255,0.22);
     color: white;
     border: none;
-    padding: 0.8rem 1.6rem; /* >=24px target */
-    border-radius: 25px;
+    padding: 0.6rem 0.8rem; /* Smaller padding */
+    border-radius: 20px; /* Smaller border radius */
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    min-height: 44px;
+    gap: 0.3rem; /* Smaller gap */
+    font-size: 0.75rem; /* Smaller font */
+    min-height: 40px; /* Smaller min height */
+    white-space: nowrap;
+    min-width: 0; /* Allow shrinking */
+    flex-shrink: 1; /* Allow shrinking */
 }
 
 .nav-btn:hover {
@@ -333,7 +372,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.9rem;
-    min-width: 200px;
+    min-width: 0; /* Allow shrinking for responsive design */
+    width: 100%;
     background: var(--bg-secondary);
     color: var(--text-color);
     min-height: 44px; /* target size */
@@ -471,10 +511,18 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Enhanced form input focus styles */
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3), 0 0 0 1px rgba(255,255,255,0.2);
+}
+
+[data-theme="dark"] .form-group input:focus, 
+[data-theme="dark"] .form-group select:focus, 
+[data-theme="dark"] .form-group textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(167,139,250,0.4), 0 0 0 1px rgba(255,255,255,0.3);
 }
 
 .form-group textarea {
@@ -636,6 +684,60 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     min-height: 1.2rem;
 }
 
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Input with help icon */
+.input-with-help {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-help input {
+    flex: 1;
+    margin-right: 0.5rem;
+}
+
+.help-icon {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: help;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+}
+
+.help-icon:hover {
+    color: var(--primary);
+    background-color: var(--background-secondary);
+}
+
+.help-icon:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.help-icon i {
+    font-size: 0.875rem;
+}
+
 /* Pro Shot specific styling */
 .pro-shot-hidden {
     display: none !important;
@@ -728,11 +830,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     display: flex;
     gap: 0.5rem;
     margin: 1rem 0;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .room-code input {
     flex: 1;
-    min-width: 350px;
+    min-width: 0; /* Allow shrinking below content size */
     width: 100%;
     max-width: 500px;
     font-family: 'Courier New', monospace;
@@ -752,11 +855,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     display: flex;
     gap: 0.5rem;
     margin: 1rem 0;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .room-code-input input {
     flex: 1;
-    min-width: 300px;
+    min-width: 0; /* Allow shrinking below content size */
     width: 100%;
     max-width: 400px;
     padding: 0.75rem 1rem;
@@ -1038,8 +1142,20 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     }
     
     .nav-btn {
-        font-size: 0.9rem;
-        padding: 0.5rem 0.75rem;
+        font-size: 0.7rem; /* Even smaller font for tablet */
+        padding: 0.5rem 0.7rem; /* Smaller padding */
+        min-width: 0; /* Allow shrinking */
+    }
+    
+    /* Hide text on tablet, show only icons */
+    .nav-btn span {
+        display: none;
+    }
+    
+    .nav-btn {
+        padding: 0.5rem; /* Square buttons for icons only */
+        min-width: 44px; /* Ensure touch target size */
+        justify-content: center;
     }
     
     .theme-toggle {
@@ -1158,10 +1274,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .btn-secondary {
     background: #6c757d;
     color: white;
+    border: 1px solid #6c757d;
 }
 
 .btn-secondary:hover {
     background: #5a6268;
+    border-color: #5a6268;
     transform: translateY(-2px);
 }
 
@@ -1252,8 +1370,37 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     .nav-btn {
         flex: 1;
         justify-content: center;
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
+        padding: 0.4rem; /* Square buttons for mobile */
+        font-size: 0.65rem; /* Very small font for mobile */
+        min-width: 44px; /* Ensure touch target size */
+    }
+    
+    /* Hide text on mobile, show only icons */
+    .nav-btn span {
+        display: none;
+    }
+    
+    /* Add tooltips for mobile navigation */
+    .nav-btn::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 1000;
+    }
+    
+    .nav-btn:hover::after {
+        opacity: 1;
     }
 
     .filters, .access-filters {
@@ -2015,7 +2162,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 
 [data-theme="dark"] .btn-secondary {
-    background: var(--bg-secondary) !important;
+    background: var(--border-color) !important;
     color: var(--text-color) !important;
     border-color: var(--border-color) !important;
 }
@@ -2025,7 +2172,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 
 [data-theme="dark"] .btn-secondary:hover {
-    background: var(--border-color) !important;
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
 }
 
 /* Dark mode for specific form sections */
@@ -2091,14 +2240,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 
 [data-theme="dark"] .sync-options .btn.btn-secondary {
-    background: var(--bg-secondary) !important;
+    background: var(--border-color) !important;
     color: var(--text-color) !important;
     border-color: var(--border-color) !important;
 }
 
 [data-theme="dark"] .sync-options .btn.btn-secondary:hover {
-    background: var(--bg-color) !important;
+    background: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
+    color: white !important;
 }
 
 /* Settings Page Styles */

@@ -73,7 +73,38 @@ class FirebaseSync {
             updateSettingsSyncStatus();
         }
         
+        // Announce sync status changes to screen readers
+        this.announceSyncStatus(status, message);
+        
         console.log('🔥 Sync Status:', status, message);
+    }
+
+    announceSyncStatus(status, message) {
+        const announcementContainer = document.getElementById('sync-announcements');
+        if (announcementContainer) {
+            announcementContainer.textContent = '';
+            let announcement = '';
+            
+            switch (status) {
+                case 'connected':
+                    announcement = `Sync connected: ${message}`;
+                    break;
+                case 'connecting':
+                    announcement = `Sync connecting: ${message}`;
+                    break;
+                case 'error':
+                    announcement = `Sync error: ${message}`;
+                    break;
+                case 'disconnected':
+                    announcement = `Sync disconnected: ${message}`;
+                    break;
+                default:
+                    announcement = `Sync status: ${message}`;
+            }
+            
+            announcementContainer.textContent = announcement;
+            setTimeout(() => { announcementContainer.textContent = ''; }, 5000);
+        }
     }
 
     generateRoomCode() {
@@ -209,8 +240,12 @@ class FirebaseSync {
             await this.database.ref(`rooms/${this.currentRoom}/data`).set(data);
             console.log('🔥 Data uploaded successfully');
             
+            // Announce successful upload
+            this.announceSyncStatus('connected', 'Data synchronized with other devices');
+            
         } catch (error) {
             console.error('🔥 Error uploading data:', error);
+            this.announceSyncStatus('error', 'Failed to sync data: ' + error.message);
         }
     }
 
@@ -262,8 +297,12 @@ class FirebaseSync {
             
             console.log('🔥 Data merged successfully');
             
+            // Announce successful data merge
+            this.announceSyncStatus('connected', 'Data updated from other device');
+            
         } catch (error) {
             console.error('🔥 Error merging data:', error);
+            this.announceSyncStatus('error', 'Failed to merge data: ' + error.message);
         }
     }
 

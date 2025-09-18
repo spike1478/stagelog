@@ -30,6 +30,29 @@ class StageLogApp {
         
         console.log('🎭 StageLog Application initialized');
     }
+    
+    // Convert technical field names to user-friendly names
+    getFieldDisplayName(fieldName) {
+        const fieldNameMap = {
+            'music_songs': 'Music/Songs',
+            'story_plot': 'Story/Plot',
+            'performance_cast': 'Performance/Cast',
+            'stage_visuals': 'Stage/Visuals',
+            'rewatch_value': 'Rewatch Value',
+            'theatre_experience': 'Theatre Experience',
+            'programme': 'Programme',
+            'atmosphere': 'Atmosphere',
+            'show_title': 'Show Title',
+            'venue': 'Venue',
+            'performance_date': 'Performance Date',
+            'ticket_price': 'Ticket Price',
+            'production_type': 'Production Type',
+            'is_musical': 'Musical',
+            'notes': 'Notes'
+        };
+        
+        return fieldNameMap[fieldName] || fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
 
     /**
      * Load and initialize the dashboard with performance data
@@ -242,6 +265,9 @@ class StageLogApp {
         try {
             console.log('🔄 Refreshing analytics...');
             this.loadAnalytics();
+            
+            // Announce analytics refresh to screen readers
+            this.announceToScreenReader('Analytics data has been refreshed with the latest information.', 'info');
         } catch (error) {
             console.error('❌ Error refreshing analytics:', error);
         }
@@ -554,6 +580,10 @@ class StageLogApp {
                     break;
                 case 'add-performance':
                     // Form is already loaded, just clear if needed
+                    // Enhance keyboard navigation for rating dropdowns
+                    setTimeout(() => {
+                        this.enhanceRatingDropdowns();
+                    }, 100);
                     break;
             }
             
@@ -893,7 +923,7 @@ class StageLogApp {
                     ${costDisplay}
                 </div>
                 <div class="performance-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="viewPerformanceDetails('${performance.id}')">View Details</button>
+                    <button class="btn btn-sm btn-secondary" onclick="showPerformanceDetail('${performance.id}')">View Details</button>
                     <button class="btn btn-sm btn-primary" onclick="editPerformance('${performance.id}')">Edit</button>
                     <button class="btn btn-sm btn-danger" onclick="deletePerformance('${performance.id}')">Delete</button>
                 </div>
@@ -953,37 +983,37 @@ class StageLogApp {
                 </div>
                 <div class="performance-details">
                     <div class="detail-item">
-                        <i class="fas fa-calendar"></i>
+                        <i class="fas fa-calendar" aria-hidden="true"></i>
                         <span>${formattedDate}</span>
                     </div>
                     <div class="detail-item">
-                        <i class="fas fa-building"></i>
+                        <i class="fas fa-building" aria-hidden="true"></i>
                         <span>${performance.theatre_name}</span>
                     </div>
                     <div class="detail-item">
-                        <i class="fas fa-map-marker-alt"></i>
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                         <span>${performance.city}</span>
                     </div>
                     <div class="detail-item">
-                        <i class="fas fa-tag"></i>
+                        <i class="fas fa-tag" aria-hidden="true"></i>
                         <span>${performance.production_type}</span>
                     </div>
                     ${this.generateCostDisplay(performance)}
                 </div>
                 ${performance.general_notes ? `
                     <div class="performance-notes">
-                        <p><i class="fas fa-sticky-note"></i> ${performance.general_notes}</p>
+                        <p><i class="fas fa-sticky-note" aria-hidden="true"></i> ${performance.general_notes}</p>
                     </div>
                 ` : ''}
                 <div class="performance-actions">
                     <button class="btn btn-secondary" onclick="showPerformanceDetail('${performance.id}')">
-                        <i class="fas fa-eye"></i> View Details
+                        <i class="fas fa-eye" aria-hidden="true"></i> View Details
                     </button>
                     <button class="btn btn-secondary" onclick="window.app.editPerformance('${performance.id}')">
-                        <i class="fas fa-edit"></i> Edit
+                        <i class="fas fa-edit" aria-hidden="true"></i> Edit
                     </button>
                     <button class="btn btn-secondary" onclick="window.app.deletePerformance('${performance.id}')">
-                        <i class="fas fa-trash"></i> Delete
+                        <i class="fas fa-trash" aria-hidden="true"></i> Delete
                     </button>
                 </div>
             </div>
@@ -995,7 +1025,7 @@ class StageLogApp {
         if (performance.production_type === 'Pro Shot') {
             return `
                 <div class="detail-item cost-exempt">
-                    <i class="fas fa-check-circle"></i>
+                    <i class="fas fa-check-circle" aria-hidden="true"></i>
                     <span>Expenses Exempt</span>
                 </div>
             `;
@@ -1963,16 +1993,23 @@ class StageLogApp {
                  const select = group.querySelector('select');
                  if (productionType === 'Pro Shot') {
                      group.classList.add('pro-shot-hidden');
-                     // Clear the rating for Pro Shot
+                     // Set ARIA attributes for hidden state
+                     group.setAttribute('aria-hidden', 'true');
                      if (select) {
+                         select.setAttribute('aria-hidden', 'true');
+                         select.setAttribute('aria-disabled', 'true');
                          select.value = '';
                          // Remove required attribute for Pro Shot
                          select.removeAttribute('required');
                      }
                  } else {
                      group.classList.remove('pro-shot-hidden');
-                     // Add required attribute back for non-Pro Shot
+                     // Set ARIA attributes for visible state
+                     group.setAttribute('aria-hidden', 'false');
                      if (select) {
+                         select.setAttribute('aria-hidden', 'false');
+                         select.removeAttribute('aria-disabled');
+                         // Add required attribute back for non-Pro Shot
                          select.setAttribute('required', 'required');
                      }
                  }
@@ -1989,6 +2026,11 @@ class StageLogApp {
          if (musicGroup && musicSelect) {
              if (!isMusical) {
                  musicGroup.classList.add('non-musical-hidden');
+                 // Set ARIA attributes for hidden state
+                 musicGroup.setAttribute('aria-hidden', 'true');
+                 musicSelect.setAttribute('aria-hidden', 'true');
+                 musicSelect.setAttribute('aria-disabled', 'true');
+                 
                  // Only clear the music rating for non-musicals if we're not editing an existing performance
                  if (!this.editingPerformanceId) {
                      musicSelect.value = '';
@@ -1996,11 +2038,22 @@ class StageLogApp {
                  // Remove required attribute for non-musicals
                  musicSelect.removeAttribute('required');
                  console.log('✅ Removed required attribute from music-songs (non-musical)');
+                 
+                 // Announce the change to screen readers
+                 this.announceToScreenReader('Music/Songs rating field hidden for non-musical performance', 'info');
              } else {
                  musicGroup.classList.remove('non-musical-hidden');
+                 // Reset ARIA attributes for visible state
+                 musicGroup.setAttribute('aria-hidden', 'false');
+                 musicSelect.setAttribute('aria-hidden', 'false');
+                 musicSelect.removeAttribute('aria-disabled');
+                 
                  // Add required attribute for musicals
                  musicSelect.setAttribute('required', 'required');
                  console.log('✅ Added required attribute to music-songs (musical)');
+                 
+                 // Announce the change to screen readers
+                 this.announceToScreenReader('Music/Songs rating field shown for musical performance', 'info');
              }
          }
      }
@@ -2110,10 +2163,16 @@ class StageLogApp {
              document.querySelectorAll('.rating-group').forEach(group => {
                  group.classList.remove('pro-shot-hidden');
                  group.classList.remove('non-musical-hidden');
+                 // Reset ARIA attributes for visible state
+                 group.setAttribute('aria-hidden', 'false');
+                 const select = group.querySelector('select');
+                 if (select) {
+                     select.setAttribute('aria-hidden', 'false');
+                     select.removeAttribute('aria-disabled');
+                 }
                  
                  // Reset rating labels to required state
                  const label = group.querySelector('label');
-                 const select = group.querySelector('select');
                  
                  if (label) {
                      const baseText = label.textContent.replace(' *', '').replace(' (optional)', '');
@@ -2227,12 +2286,13 @@ class StageLogApp {
             const requiredRatings = ['music_songs', 'story_plot', 'performance_cast', 'stage_visuals', 'rewatch_value'];
             for (const ratingType of requiredRatings) {
                 const ratingValue = rating[ratingType];
+                const displayName = this.getFieldDisplayName(ratingType);
                 if (ratingValue === 0) {
-                    this.showMessage(`Please provide a rating for ${ratingType.replace('_', ' ')} for past performances.`, 'error');
+                    this.showMessage(`Please provide a rating for ${displayName} for past performances.`, 'error');
                     return;
                 }
                 if (ratingValue > 0 && (ratingValue < 0.25 || ratingValue > 5.0)) {
-                    this.showMessage(`Please provide a valid rating for ${ratingType.replace('_', ' ')} (0.25 - 5.0).`, 'error');
+                    this.showMessage(`Please provide a valid rating for ${displayName} (0.25 - 5.0).`, 'error');
                     return;
                 }
             }
@@ -2246,7 +2306,8 @@ class StageLogApp {
              for (const ratingType of allRatings) {
                  const ratingValue = rating[ratingType];
                  if (ratingValue > 0 && (ratingValue < 0.25 || ratingValue > 5.0)) {
-                     this.showMessage(`Please provide a valid rating for ${ratingType.replace('_', ' ')} (0.25 - 5.0).`, 'error');
+                     const displayName = this.getFieldDisplayName(ratingType);
+                     this.showMessage(`Please provide a valid rating for ${displayName} (0.25 - 5.0).`, 'error');
                      return;
                  }
              }
@@ -2368,8 +2429,13 @@ class StageLogApp {
         
         console.log('Displaying search results:', shows.length, 'shows');
         
+        // Get search query for announcements
+        const searchValue = document.getElementById('show-search')?.value || '';
+        
+        // Announce search results to screen readers
+        this.announceSearchResults(shows.length, searchValue);
+        
         if (shows.length === 0) {
-            const searchValue = document.getElementById('show-search')?.value || '';
             resultsContainer.innerHTML = `
                 <div class="search-result" style="padding: 1rem; text-align: center; border: 1px dashed #ccc; background: #f9f9f9;">
                     <p style="margin: 0 0 0.5rem 0;">No shows found for "${searchValue}"</p>
@@ -2572,12 +2638,182 @@ class StageLogApp {
             mainContent.insertBefore(messageDiv, mainContent.firstChild);
         }
 
+        // Announce message to screen readers
+        this.announceToScreenReader(message, type);
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (messageDiv.parentElement) {
                 messageDiv.remove();
             }
         }, 5000);
+    }
+
+    // Announce messages to screen readers
+    announceToScreenReader(message, type = 'info') {
+        const announcementContainer = document.getElementById('message-announcements');
+        if (announcementContainer) {
+            // Clear previous announcement
+            announcementContainer.textContent = '';
+            
+            // Add type prefix for context
+            const typePrefix = type === 'error' ? 'Error: ' : 
+                              type === 'success' ? 'Success: ' : 
+                              type === 'info' ? 'Information: ' : '';
+            
+            // Set the announcement text
+            announcementContainer.textContent = typePrefix + message;
+            
+            // Clear after a short delay to allow for re-announcement
+            setTimeout(() => {
+                announcementContainer.textContent = '';
+            }, 1000);
+        }
+    }
+
+    // Announce search results to screen readers
+    announceSearchResults(count, query) {
+        const searchAnnouncementContainer = document.getElementById('search-announcements');
+        if (searchAnnouncementContainer) {
+            // Clear previous announcement
+            searchAnnouncementContainer.textContent = '';
+            
+            let announcement = '';
+            if (count === 0) {
+                announcement = `No shows found for "${query}". You can create a custom show if needed.`;
+            } else if (count === 1) {
+                announcement = `1 show found for "${query}".`;
+            } else {
+                announcement = `${count} shows found for "${query}".`;
+            }
+            
+            // Set the announcement text
+            searchAnnouncementContainer.textContent = announcement;
+            
+            // Clear after a short delay
+            setTimeout(() => {
+                searchAnnouncementContainer.textContent = '';
+            }, 2000);
+        }
+    }
+
+    // Enhanced keyboard navigation for rating dropdowns
+    enhanceRatingDropdowns() {
+        const ratingFields = [
+            'music-songs', 'story-plot', 'performance-cast', 
+            'stage-visuals', 'rewatch-value', 'theatre-experience', 
+            'programme', 'atmosphere'
+        ];
+
+        ratingFields.forEach(fieldId => {
+            const select = document.getElementById(fieldId);
+            if (select) {
+                // Add keyboard event listeners
+                select.addEventListener('keydown', (e) => {
+                    this.handleRatingKeyboardNavigation(e, select);
+                });
+
+                // Add focus event for better UX
+                select.addEventListener('focus', () => {
+                    select.setAttribute('aria-describedby', `${fieldId}-keyboard-help`);
+                });
+            }
+        });
+    }
+
+    // Handle keyboard navigation for rating dropdowns
+    handleRatingKeyboardNavigation(event, select) {
+        const currentValue = parseFloat(select.value) || 0;
+        const ratingOptions = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5, 4.75, 5.0];
+        
+        switch (event.key) {
+            case '1':
+                event.preventDefault();
+                select.value = '1.0';
+                this.announceRatingChange(select, '1.0');
+                break;
+            case '2':
+                event.preventDefault();
+                select.value = '2.0';
+                this.announceRatingChange(select, '2.0');
+                break;
+            case '3':
+                event.preventDefault();
+                select.value = '3.0';
+                this.announceRatingChange(select, '3.0');
+                break;
+            case '4':
+                event.preventDefault();
+                select.value = '4.0';
+                this.announceRatingChange(select, '4.0');
+                break;
+            case '5':
+                event.preventDefault();
+                select.value = '5.0';
+                this.announceRatingChange(select, '5.0');
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                const nextRating = this.getNextRating(currentValue, ratingOptions, 'up');
+                if (nextRating !== null) {
+                    select.value = nextRating.toString();
+                    this.announceRatingChange(select, nextRating.toString());
+                }
+                break;
+            case 'ArrowDown':
+                event.preventDefault();
+                const prevRating = this.getNextRating(currentValue, ratingOptions, 'down');
+                if (prevRating !== null) {
+                    select.value = prevRating.toString();
+                    this.announceRatingChange(select, prevRating.toString());
+                }
+                break;
+            case 'Home':
+                event.preventDefault();
+                select.value = '0.25';
+                this.announceRatingChange(select, '0.25');
+                break;
+            case 'End':
+                event.preventDefault();
+                select.value = '5.0';
+                this.announceRatingChange(select, '5.0');
+                break;
+            case 'Escape':
+                event.preventDefault();
+                select.value = '';
+                this.announceRatingChange(select, 'no rating');
+                break;
+        }
+    }
+
+    // Get next rating value for arrow key navigation
+    getNextRating(currentValue, ratingOptions, direction) {
+        const currentIndex = ratingOptions.indexOf(currentValue);
+        
+        if (direction === 'up') {
+            // Move to next higher rating
+            if (currentIndex < ratingOptions.length - 1) {
+                return ratingOptions[currentIndex + 1];
+            } else if (currentValue === 0) {
+                return ratingOptions[0]; // Start from 0.25 if no rating selected
+            }
+        } else if (direction === 'down') {
+            // Move to next lower rating
+            if (currentIndex > 0) {
+                return ratingOptions[currentIndex - 1];
+            } else if (currentValue === 0) {
+                return ratingOptions[ratingOptions.length - 1]; // Go to 5.0 if no rating selected
+            }
+        }
+        
+        return null;
+    }
+
+    // Announce rating changes to screen readers
+    announceRatingChange(select, newValue) {
+        const fieldName = this.getFieldDisplayName(select.name);
+        const announcement = `${fieldName} rating set to ${newValue}`;
+        this.announceToScreenReader(announcement, 'info');
     }
 }
 
@@ -2675,6 +2911,9 @@ function showPerformanceDetail(performanceId) {
     const performance = window.db.getPerformanceById(performanceId);
     if (!performance) return;
     
+    // Store the currently focused element
+    window.lastFocusedElement = document.activeElement;
+    
     const show = window.db.getShowById(performance.show_id);
     const modal = document.getElementById('performance-modal');
     const modalTitle = document.getElementById('modal-title');
@@ -2768,6 +3007,12 @@ function closePerformanceModal() {
     const modal = document.getElementById('performance-modal');
     if (modal) {
         modal.style.display = 'none';
+        
+        // Return focus to the trigger element
+        if (window.lastFocusedElement) {
+            window.lastFocusedElement.focus();
+            window.lastFocusedElement = null;
+        }
     }
 }
 
@@ -3093,9 +3338,33 @@ class FormValidator {
         this.errors = [];
     }
     
+    // Convert technical field names to user-friendly names
+    getFieldDisplayName(fieldName) {
+        const fieldNameMap = {
+            'music_songs': 'Music/Songs',
+            'story_plot': 'Story/Plot',
+            'performance_cast': 'Performance/Cast',
+            'stage_visuals': 'Stage/Visuals',
+            'rewatch_value': 'Rewatch Value',
+            'theatre_experience': 'Theatre Experience',
+            'programme': 'Programme',
+            'atmosphere': 'Atmosphere',
+            'show_title': 'Show Title',
+            'venue': 'Venue',
+            'performance_date': 'Performance Date',
+            'ticket_price': 'Ticket Price',
+            'production_type': 'Production Type',
+            'is_musical': 'Musical',
+            'notes': 'Notes'
+        };
+        
+        return fieldNameMap[fieldName] || fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+    
     validateRequired(value, fieldName) {
         if (!value || value.trim() === '') {
-            this.errors.push(`${fieldName} is required.`);
+            const displayName = this.getFieldDisplayName(fieldName);
+            this.errors.push(`${displayName} is required.`);
             return false;
         }
         return true;
@@ -3104,7 +3373,8 @@ class FormValidator {
     validateDate(dateString, fieldName) {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
-            this.errors.push(`${fieldName} must be a valid date.`);
+            const displayName = this.getFieldDisplayName(fieldName);
+            this.errors.push(`${displayName} must be a valid date.`);
             return false;
         }
         return true;
@@ -3112,14 +3382,15 @@ class FormValidator {
     
     validateRating(rating, fieldName, isRequired = true) {
         const numRating = parseFloat(rating);
+        const displayName = this.getFieldDisplayName(fieldName);
         
         if (isRequired && (!rating || rating === '')) {
-            this.errors.push(`${fieldName} is required.`);
+            this.errors.push(`${displayName} is required.`);
             return false;
         }
         
         if (rating && (numRating < 0.25 || numRating > 5.0)) {
-            this.errors.push(`${fieldName} must be between 0.25 and 5.0.`);
+            this.errors.push(`${displayName} must be between 0.25 and 5.0.`);
             return false;
         }
         
@@ -3373,6 +3644,9 @@ document.addEventListener('DOMContentLoaded', () => {
 window.showSyncModal = function() {
     const modal = document.getElementById('sync-modal');
     if (modal) {
+        // Store the currently focused element
+        window.lastFocusedElement = document.activeElement;
+        
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
         
@@ -3392,6 +3666,12 @@ window.closeSyncModal = function() {
     if (modal) {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
+        
+        // Return focus to the trigger element
+        if (window.lastFocusedElement) {
+            window.lastFocusedElement.focus();
+            window.lastFocusedElement = null;
+        }
     }
 }
 
@@ -3774,6 +4054,12 @@ function closePerformanceModal() {
     const modal = document.getElementById('performance-modal');
     if (modal) {
         modal.style.display = 'none';
+        
+        // Return focus to the trigger element
+        if (window.lastFocusedElement) {
+            window.lastFocusedElement.focus();
+            window.lastFocusedElement = null;
+        }
     }
 }
 
