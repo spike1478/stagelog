@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StageLog - Theatre Performance Tracker</title>
-    <link rel="stylesheet" href="styles.css?v=2.6.1">
+    <link rel="stylesheet" href="styles.css?v=2.6.3">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -17,40 +17,44 @@
     <nav class="navbar" role="navigation" aria-label="Primary">
         <div class="nav-container">
             <h1 class="nav-title">
-                <i class="fas fa-theater-masks"></i>
+                <i class="fas fa-theater-masks" aria-hidden="true"></i>
                 StageLog
             </h1>
             <div class="nav-links">
-                <button class="nav-btn active" data-page="dashboard">
-                    <i class="fas fa-home"></i>
-                    Performance Overview
+                <button class="nav-btn active" data-page="dashboard" data-tooltip="Performance Overview">
+                    <i class="fas fa-home" aria-hidden="true"></i>
+                    <span>Performance Overview</span>
                 </button>
-                <button class="nav-btn" data-page="add-performance">
-                    <i class="fas fa-plus"></i>
-                    Add Performance
+                <button class="nav-btn" data-page="add-performance" data-tooltip="Add Performance">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    <span>Add Performance</span>
                 </button>
-                <button class="nav-btn" data-page="my-shows">
-                    <i class="fas fa-list"></i>
-                    My Shows
+                <button class="nav-btn" data-page="my-shows" data-tooltip="My Performances">
+                    <i class="fas fa-list" aria-hidden="true"></i>
+                    <span>My Performances</span>
                 </button>
-                <button class="nav-btn" data-page="analytics">
-                    <i class="fas fa-chart-bar"></i>
-                    Analytics
+                <button class="nav-btn" data-page="analytics" data-tooltip="Analytics">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                    <span>Analytics</span>
                 </button>
-                <button class="nav-btn" data-page="access-schemes">
-                    <i class="fas fa-universal-access"></i>
-                    Access Schemes
+                <button class="nav-btn" data-page="access-schemes" data-tooltip="Access Schemes">
+                    <i class="fas fa-universal-access" aria-hidden="true"></i>
+                    <span>Access Schemes</span>
                 </button>
-                <button class="nav-btn" data-page="settings">
-                    <i class="fas fa-cog"></i>
-                    Settings
+                <button class="nav-btn" data-page="settings" data-tooltip="Settings">
+                    <i class="fas fa-cog" aria-hidden="true"></i>
+                    <span>Settings</span>
                 </button>
             </div>
             <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode" aria-label="Toggle theme">
-                <i class="fas fa-moon" id="theme-icon"></i>
+                <i class="fas fa-moon" id="theme-icon" aria-hidden="true"></i>
             </button>
         </div>
     </nav>
+
+    <!-- ARIA Live Regions for Accessibility -->
+    <div id="message-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+    <div id="search-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
     <main id="main-content" class="main-content" role="main">
         <!-- Dashboard Page -->
@@ -58,7 +62,7 @@
             <div class="page-header">
                 <h2>Performance Overview</h2>
                 <div class="filters">
-                    <input type="text" id="search-filter" placeholder="Search shows, theatres, cities...">
+                    <input type="text" id="search-filter" placeholder="Search performances, theatres, cities...">
                     <select id="sort-filter">
                         <option value="date-desc">Date (Newest First)</option>
                         <option value="date-asc">Date (Oldest First)</option>
@@ -79,19 +83,19 @@
             </div>
 
             <!-- Quick Stats Overview -->
-            <div class="quick-stats-overview">
+            <aside class="quick-stats-overview" aria-label="Performance statistics overview">
                 <div class="quick-stat-card">
                     <div class="quick-stat-icon">
-                        <i class="fas fa-theater-masks"></i>
+                        <i class="fas fa-theater-masks" aria-hidden="true"></i>
                     </div>
                     <div class="quick-stat-content">
                         <div class="quick-stat-number" id="total-performances">0</div>
-                        <div class="quick-stat-label">Total Shows</div>
+                        <div class="quick-stat-label">Total Performances</div>
                     </div>
                 </div>
                 <div class="quick-stat-card">
                     <div class="quick-stat-icon">
-                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
                     </div>
                     <div class="quick-stat-content">
                         <div class="quick-stat-number" id="average-rating">0.00</div>
@@ -104,7 +108,7 @@
                     </div>
                     <div class="quick-stat-content">
                         <div class="quick-stat-number" id="upcoming-shows">0</div>
-                        <div class="quick-stat-label">Upcoming Shows</div>
+                        <div class="quick-stat-label">Upcoming Performances</div>
                     </div>
                 </div>
                 <div class="quick-stat-card">
@@ -116,32 +120,32 @@
                         <div class="quick-stat-label">Favourite City</div>
                     </div>
                 </div>
-            </div>
+            </aside>
 
-            <div class="performance-sections">
-                <section class="performance-section">
-                    <h3><i class="fas fa-clock"></i> Upcoming Bookings</h3>
+            <section class="performance-sections" aria-label="Performance listings">
+                <section class="performance-section" aria-labelledby="upcoming-heading">
+                    <h3 id="upcoming-heading"><i class="fas fa-clock" aria-hidden="true"></i> Upcoming Performances</h3>
                     <div id="upcoming-performances" class="performance-list">
                         <!-- Upcoming performances will be populated here -->
                     </div>
                 </section>
 
-                <section class="performance-section">
-                    <h3><i class="fas fa-history"></i> Past Performances</h3>
+                <section class="performance-section" aria-labelledby="past-heading">
+                    <h3 id="past-heading"><i class="fas fa-history" aria-hidden="true"></i> Past Performances</h3>
                     <div id="past-performances" class="performance-list">
                         <!-- Past performances will be populated here -->
                     </div>
                 </section>
-            </div>
+            </section>
         </div>
 
-        <!-- My Shows Page -->
+        <!-- My Performances Page -->
         <div id="my-shows" class="page">
             <div class="page-header">
-                <h2>My Shows</h2>
+                <h2>My Performances</h2>
                 <p>Complete list of all your theatre performances</p>
                 <div class="filters">
-                    <input type="text" id="my-shows-search-filter" placeholder="Search shows, theatres, cities...">
+                    <input type="text" id="my-shows-search-filter" placeholder="Search performances, theatres, cities...">
                     <select id="my-shows-sort-filter">
                         <option value="date-desc">Date (Newest First)</option>
                         <option value="date-asc">Date (Oldest First)</option>
@@ -161,14 +165,14 @@
                 </div>
             </div>
 
-            <div class="performance-sections">
-                <section class="performance-section">
-                    <h3><i class="fas fa-list"></i> All Performances</h3>
+            <section class="performance-sections" aria-label="All performances listing">
+                <section class="performance-section" aria-labelledby="all-performances-heading">
+                    <h3 id="all-performances-heading"><i class="fas fa-list" aria-hidden="true"></i> All Performances</h3>
                     <div id="my-shows-all-performances" class="performance-list">
                         <!-- All performances will be populated here -->
                     </div>
                 </section>
-            </div>
+            </section>
         </div>
 
         <!-- Add Performance Page -->
@@ -178,8 +182,8 @@
             </div>
 
             <form id="performance-form" class="performance-form">
-                <div class="form-section">
-                    <h3>Show Information</h3>
+                <section class="form-section" aria-labelledby="show-info-heading">
+                    <h3 id="show-info-heading">Show Information</h3>
                     <div class="form-group">
                         <label for="show-search">Show Title *</label>
                         <input type="text" id="show-search" placeholder="Search for a show..." required>
@@ -188,14 +192,19 @@
                     <div id="show-details" class="show-details hidden">
                         <!-- Show details will be populated here -->
                     </div>
-                </div>
+                </section>
 
-                <div class="form-section">
-                    <h3>Performance Details</h3>
+                <section class="form-section" aria-labelledby="performance-details-heading">
+                    <h3 id="performance-details-heading">Performance Details</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="date-seen">Date Seen *</label>
-                            <input type="date" id="date-seen" required>
+                            <div class="input-with-help">
+                                <input type="date" id="date-seen" required aria-label="Performance date. Press Alt+Down arrow to open date picker, use arrow keys to navigate, Enter to select.">
+                                <button type="button" class="help-icon" title="Keyboard shortcuts: Alt+Down to open date picker, arrow keys to navigate, Enter to select" aria-label="Date picker keyboard help">
+                                    <i class="fas fa-question-circle" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="theatre-name">Theatre Name *</label>
@@ -229,10 +238,10 @@
                             </label>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="form-section">
-                    <h3>Rating</h3>
+                <section class="form-section" aria-labelledby="rating-heading">
+                    <h3 id="rating-heading">Rating</h3>
                     <div class="rating-grid">
                         <div class="rating-group" id="music-songs-group">
                             <label for="music-songs">Music/Songs *</label>
@@ -259,6 +268,7 @@
                                 <option value="4.75">4.75</option>
                                 <option value="5">5.0</option>
                             </select>
+                            <div id="music-songs-keyboard-help" class="sr-only">Keyboard shortcuts: 1-5 for quick rating, arrow keys to navigate, Home/End for min/max, Escape to clear</div>
                         </div>
                         <div class="rating-group">
                             <label for="story-plot">Story/Plot *</label>
@@ -285,6 +295,7 @@
                                 <option value="4.75">4.75</option>
                                 <option value="5">5.0</option>
                             </select>
+                            <div id="story-plot-keyboard-help" class="sr-only">Keyboard shortcuts: 1-5 for quick rating, arrow keys to navigate, Home/End for min/max, Escape to clear</div>
                         </div>
                         <div class="rating-group">
                             <label for="performance-cast">Performance/Cast *</label>
@@ -311,6 +322,7 @@
                                 <option value="4.75">4.75 </option>
                                 <option value="5">5.0 </option>
                             </select>
+                            <div id="performance-cast-keyboard-help" class="sr-only">Keyboard shortcuts: 1-5 for quick rating, arrow keys to navigate, Home/End for min/max, Escape to clear</div>
                         </div>
                         <div class="rating-group">
                             <label for="stage-visuals">Stage/Visuals *</label>
@@ -337,6 +349,7 @@
                                 <option value="4.75">4.75 </option>
                                 <option value="5">5.0 </option>
                             </select>
+                            <div id="stage-visuals-keyboard-help" class="sr-only">Keyboard shortcuts: 1-5 for quick rating, arrow keys to navigate, Home/End for min/max, Escape to clear</div>
                         </div>
                         <div class="rating-group">
                             <label for="rewatch-value">Rewatch Value *</label>
@@ -363,10 +376,11 @@
                                 <option value="4.75">4.75 </option>
                                 <option value="5">5.0 </option>
                             </select>
+                            <div id="rewatch-value-keyboard-help" class="sr-only">Keyboard shortcuts: 1-5 for quick rating, arrow keys to navigate, Home/End for min/max, Escape to clear</div>
                         </div>
-                        <div class="rating-group" id="theatre-experience-group">
+                        <div class="rating-group" id="theatre-experience-group" aria-hidden="false">
                             <label for="theatre-experience">Theatre Experience</label>
-                            <select id="theatre-experience" name="theatre-experience">
+                            <select id="theatre-experience" name="theatre-experience" aria-describedby="theatre-experience-description">
                                 <option value="">Select rating...</option>
                                 <option value="0.25">0.25 </option>
                                 <option value="0.5">0.5 </option>
@@ -389,10 +403,12 @@
                                 <option value="4.75">4.75 </option>
                                 <option value="5">5.0 </option>
                             </select>
+                            <div id="theatre-experience-description" class="sr-only">Rating for overall theatre experience including venue quality and comfort</div>
+                            <div id="theatre-experience-keyboard-help" class="sr-only">Keyboard shortcuts: 1-5 for quick rating, arrow keys to navigate, Home/End for min/max, Escape to clear</div>
                         </div>
-                        <div class="rating-group" id="programme-group">
+                        <div class="rating-group" id="programme-group" aria-hidden="false">
                             <label for="programme">Programme</label>
-                            <select id="programme" name="programme">
+                            <select id="programme" name="programme" aria-describedby="programme-description">
                                 <option value="">Select rating...</option>
                                 <option value="0.25">0.25 </option>
                                 <option value="0.5">0.5 </option>
@@ -415,10 +431,12 @@
                                 <option value="4.75">4.75 </option>
                                 <option value="5">5.0 </option>
                             </select>
+                            <div id="programme-description" class="sr-only">Rating for the quality of the programme or playbill</div>
+                            <div id="programme-keyboard-help" class="sr-only">Keyboard shortcuts: 1-5 for quick rating, arrow keys to navigate, Home/End for min/max, Escape to clear</div>
                         </div>
-                        <div class="rating-group" id="atmosphere-group">
+                        <div class="rating-group" id="atmosphere-group" aria-hidden="false">
                             <label for="atmosphere">Atmosphere</label>
-                            <select id="atmosphere" name="atmosphere">
+                            <select id="atmosphere" name="atmosphere" aria-describedby="atmosphere-description">
                                 <option value="">Select rating...</option>
                                 <option value="0.25">0.25 </option>
                                 <option value="0.5">0.5 </option>
@@ -441,12 +459,14 @@
                                 <option value="4.75">4.75 </option>
                                 <option value="5">5.0 </option>
                             </select>
+                            <div id="atmosphere-description" class="sr-only">Rating for the general theatre atmosphere and ambiance</div>
+                            <div id="atmosphere-keyboard-help" class="sr-only">Keyboard shortcuts: 1-5 for quick rating, arrow keys to navigate, Home/End for min/max, Escape to clear</div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="form-section">
-                    <h3>Expense Information</h3>
+                <section class="form-section" aria-labelledby="expenses-heading">
+                    <h3 id="expenses-heading">Expense Information</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ticket-price">Ticket Price</label>
@@ -483,10 +503,10 @@
                             <input type="number" id="other-expenses" step="0.01" min="0" placeholder="e.g., 5.00 (programmes, drinks, etc.)">
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="form-section">
-                    <h3>Notes</h3>
+                <section class="form-section" aria-labelledby="notes-heading">
+                    <h3 id="notes-heading">Notes</h3>
                     <div class="form-group">
                         <label for="notes-access">Notes on Access</label>
                         <textarea id="notes-access" placeholder="e.g., Uses In-Ear, Didn't work"></textarea>
@@ -495,7 +515,7 @@
                         <label for="general-notes">General Notes</label>
                         <textarea id="general-notes" placeholder="Any other comments about the performance"></textarea>
                     </div>
-                </div>
+                </section>
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
@@ -514,7 +534,7 @@
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                     <button class="btn btn-secondary" onclick="exportStats('json')" title="Export stats as JSON">
-                        <i class="fas fa-download"></i> Export JSON
+                        <i class="fas fa-download" aria-hidden="true"></i> Export JSON
                     </button>
                 
                 </div>
@@ -523,13 +543,13 @@
             <div class="analytics-container">
                 <div id="analytics-live" class="sr-only" aria-live="polite"></div>
                 <!-- Overview Stats -->
-                <div class="stats-overview">
+                <section class="stats-overview" aria-labelledby="overview-heading">
                     <div class="overview-card">
-                        <h3>🎭 Overview</h3>
+                        <h3 id="overview-heading">🎭 Overview</h3>
                         <div class="overview-stats">
                             <div class="overview-stat">
                                 <div class="stat-value" id="total-shows">0</div>
-                                <div class="stat-label">Total Shows</div>
+                                <div class="stat-label">Total Performances</div>
                             </div>
                             <div class="overview-stat">
                                 <div class="stat-value" id="total-spent">£0.00</div>
@@ -541,32 +561,32 @@
                             </div>
                             <div class="overview-stat">
                                 <div class="stat-value" id="shows-per-month">0.0</div>
-                                <div class="stat-label">Shows/Month</div>
+                                <div class="stat-label">Performances/Month</div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                                     <!-- Key Insights -->
-                    <div class="insights-section">
-                        <h3>💡 Key Insights</h3>
+                    <section class="insights-section" aria-labelledby="insights-heading">
+                        <h3 id="insights-heading">💡 Key Insights</h3>
                         <div id="insights-container" class="insights-grid">
                             <!-- Insights will be populated here -->
                         </div>
-                    </div>
+                    </section>
 
                 <!-- Achievements -->
-                <div class="achievements-section">
-                    <h3>🏆 Achievements</h3>
+                <section class="achievements-section" aria-labelledby="achievements-heading">
+                    <h3 id="achievements-heading">🏆 Achievements</h3>
                     <div id="achievements-container" class="achievements-grid">
                         <!-- Achievements will be populated here -->
                     </div>
-                </div>
+                </section>
 
                 <!-- Detailed Stats Grid -->
-                <div class="detailed-stats">
-                    <div class="stats-section">
-                        <h3>💰 Spending Analysis</h3>
+                <section class="detailed-stats" aria-label="Detailed performance statistics">
+                    <section class="stats-section" aria-labelledby="spending-analysis-heading">
+                        <h3 id="spending-analysis-heading">💰 Spending Analysis</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                                 <div class="stat-icon">💸</div>
@@ -597,10 +617,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="stats-section">
-                        <h3>🎫 Cost Per Ticket</h3>
+                    <section class="stats-section" aria-labelledby="cost-per-ticket-heading">
+                        <h3 id="cost-per-ticket-heading">🎫 Cost Per Ticket</h3>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="stat-icon">💸</div>
@@ -631,10 +651,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="stats-section">
-                        <h3>⭐ Rating Analysis</h3>
+                    <section class="stats-section" aria-labelledby="rating-analysis-heading">
+                        <h3 id="rating-analysis-heading">⭐ Rating Analysis</h3>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="stat-icon">📈</div>
@@ -654,21 +674,21 @@
                                 <div class="stat-icon">🎯</div>
                                 <div class="stat-content">
                                     <div class="stat-number" id="rating-percentage">0%</div>
-                                    <div class="stat-label">Shows Rated</div>
+                                    <div class="stat-label">Performances Rated</div>
                                 </div>
                     </div>
                     <div class="stat-card">
                                 <div class="stat-icon">⭐</div>
                                 <div class="stat-content">
                                     <div class="stat-number" id="five-stars">0</div>
-                                    <div class="stat-label">5-Star Shows</div>
+                                    <div class="stat-label">5-Star Performances</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                                            <div class="stats-section">
-                            <h3>🏛️ Venue Analysis</h3>
+                    <section class="stats-section" aria-labelledby="venue-analysis-heading">
+                        <h3 id="venue-analysis-heading">🏛️ Venue Analysis</h3>
                             <div class="venue-stats">
                                 <div class="venue-summary">
                                     <div class="venue-stat">
@@ -684,10 +704,10 @@
                                     <!-- Top venues will be populated here -->
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
-                                            <div class="stats-section">
-                            <h3>🎪 Show Analysis</h3>
+                    <section class="stats-section" aria-labelledby="performance-analysis-heading">
+                        <h3 id="performance-analysis-heading">🎪 Performance Analysis</h3>
                             <div class="show-stats">
                                 <div class="show-summary">
                                     <div class="show-stat">
@@ -703,8 +723,8 @@
                                     <!-- Top shows will be populated here -->
                                 </div>
                             </div>
-                    </div>
-                </div>
+                        </section>
+                </section>
 
                 <!-- Year-over-Year Comparison -->
                 <div class="comparison-section">
@@ -715,7 +735,7 @@
                             <div class="comparison-stats">
                                 <div class="comparison-stat">
                                     <div class="stat-number" id="this-year-shows">0</div>
-                                    <div class="stat-label">Shows</div>
+                                    <div class="stat-label">Performances</div>
                                 </div>
                                 <div class="comparison-stat">
                                     <div class="stat-number" id="this-year-spent">£0.00</div>
@@ -732,7 +752,7 @@
                             <div class="comparison-stats">
                                 <div class="comparison-stat">
                                     <div class="stat-number" id="last-year-shows">0</div>
-                                    <div class="stat-label">Shows</div>
+                                    <div class="stat-label">Performances</div>
                                 </div>
                                 <div class="comparison-stat">
                                     <div class="stat-number" id="last-year-spent">£0.00</div>
@@ -749,7 +769,7 @@
                             <div class="comparison-stats">
                                 <div class="comparison-stat">
                                     <div class="stat-number" id="shows-change">0%</div>
-                                    <div class="stat-label">Shows</div>
+                                    <div class="stat-label">Performances</div>
                                 </div>
                                 <div class="comparison-stat">
                                     <div class="stat-number" id="spending-change">0%</div>
@@ -809,20 +829,20 @@
 
             <div class="settings-container">
                 <!-- Data Management Section -->
-                <div class="settings-section">
-                    <h3><i class="fas fa-database"></i> Data Management</h3>
+                <section class="settings-section" aria-labelledby="data-management-heading">
+                    <h3 id="data-management-heading"><i class="fas fa-database" aria-hidden="true"></i> Data Management</h3>
                     <div class="settings-grid">
                         <div class="setting-card">
                             <div class="setting-icon">
-                                <i class="fas fa-download"></i>
+                                <i class="fas fa-download" aria-hidden="true"></i>
                             </div>
                             <div class="setting-content">
                                 <h4>Export Data</h4>
-                                <p>Download all your performances, shows, and access schemes as a JSON file</p>
+                                <p>Download all your performances and access schemes as a JSON file</p>
                                 <div class="setting-actions">
                                     <button class="btn btn-primary" onclick="exportDataWithFeedback()" title="Export your data as JSON">
-                                        <i class="fas fa-download"></i> Export Data
-                                    </button>
+                                        <i class="fas fa-download" aria-hidden="true"></i> Export Data
+                    </button>
                                     <div class="action-feedback" id="export-feedback"></div>
                                 </div>
                             </div>
@@ -830,15 +850,15 @@
 
                         <div class="setting-card">
                             <div class="setting-icon">
-                                <i class="fas fa-upload"></i>
+                                <i class="fas fa-upload" aria-hidden="true"></i>
                             </div>
                             <div class="setting-content">
                                 <h4>Restore Data</h4>
                                 <p>Restore your data from a previously exported backup file</p>
                                 <div class="setting-actions">
-                                    <button class="btn btn-secondary" onclick="showRestoreModal()" title="Restore data from backup">
-                                        <i class="fas fa-upload"></i> Restore Data
-                                    </button>
+                    <button class="btn btn-secondary" onclick="showRestoreModal()" title="Restore data from backup">
+                                        <i class="fas fa-upload" aria-hidden="true"></i> Restore Data
+                    </button>
                                     <div class="action-feedback" id="restore-feedback"></div>
                                 </div>
                             </div>
@@ -846,56 +866,56 @@
 
                         <div class="setting-card">
                             <div class="setting-icon">
-                                <i class="fas fa-file-import"></i>
+                                <i class="fas fa-file-import" aria-hidden="true"></i>
                             </div>
                             <div class="setting-content">
                                 <h4>Import Data</h4>
                                 <p>Import data from a JSON file (useful for testing with sample data)</p>
                                 <div class="setting-actions">
-                                    <button class="btn btn-secondary" onclick="showImportModal()" title="Import data from JSON file">
-                                        <i class="fas fa-file-import"></i> Import JSON
-                                    </button>
+                    <button class="btn btn-secondary" onclick="showImportModal()" title="Import data from JSON file">
+                                        <i class="fas fa-file-import" aria-hidden="true"></i> Import JSON
+                    </button>
                                     <div class="action-feedback" id="import-feedback"></div>
                                 </div>
-                            </div>
-                        </div>
+                </div>
+            </div>
 
                         <div class="setting-card">
                             <div class="setting-icon">
-                                <i class="fas fa-refresh"></i>
+                                <i class="fas fa-refresh" aria-hidden="true"></i>
                             </div>
                             <div class="setting-content">
                                 <h4>Refresh Data</h4>
                                 <p>Reload all data from local storage (useful if data seems out of sync)</p>
                                 <div class="setting-actions">
                                     <button class="btn btn-secondary" onclick="refreshAccessDataWithFeedback()">
-                                        <i class="fas fa-refresh"></i> Refresh Data
+                                        <i class="fas fa-refresh" aria-hidden="true"></i> Refresh Data
                                     </button>
                                     <div class="action-feedback" id="refresh-feedback"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- Device Sync Section -->
-                <div class="settings-section">
-                    <h3><i class="fas fa-sync-alt"></i> Device Sync</h3>
+                <section class="settings-section" aria-labelledby="device-sync-heading">
+                    <h3 id="device-sync-heading"><i class="fas fa-sync-alt" aria-hidden="true"></i> Device Sync</h3>
                     <div class="settings-grid">
                         <div class="setting-card">
                             <div class="setting-icon">
-                                <i class="fas fa-sync-alt"></i>
+                                <i class="fas fa-sync-alt" aria-hidden="true"></i>
                             </div>
                             <div class="setting-content">
                                 <h4>Device Sync</h4>
                                 <p>Sync your data across multiple devices in real-time using Firebase</p>
                                 <div class="sync-status-info" id="sync-status-info">
                                     <div class="sync-indicator">
-                                        <i class="fas fa-circle" id="sync-status-icon"></i>
+                                        <i class="fas fa-circle" id="sync-status-icon" aria-hidden="true"></i>
                                         <span id="sync-status-text">Not connected</span>
                                     </div>
                                     <div class="device-count" id="device-count" style="display: none;">
-                                        <i class="fas fa-users"></i>
+                                        <i class="fas fa-users" aria-hidden="true"></i>
                                         <span id="connected-devices">0</span> devices connected
                                     </div>
                                     <div class="connected-devices-list" id="connected-devices-list" style="display: none;">
@@ -904,31 +924,31 @@
                                 </div>
                                 <div class="setting-actions">
                                     <button class="btn btn-primary" onclick="showSyncModal()" title="Sync with other devices">
-                                        <i class="fas fa-sync-alt"></i> Device Sync
+                                        <i class="fas fa-sync-alt" aria-hidden="true"></i> Device Sync
                                     </button>
                                     <button class="btn btn-danger" onclick="disconnectSyncFromSettings()" id="disconnect-btn" style="display: none;" title="Disconnect from sync">
-                                        <i class="fas fa-times"></i> Disconnect
+                                        <i class="fas fa-times" aria-hidden="true"></i> Disconnect
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- Analytics Section -->
-                <div class="settings-section">
-                    <h3><i class="fas fa-chart-bar"></i> Analytics</h3>
+                <section class="settings-section" aria-labelledby="analytics-settings-heading">
+                    <h3 id="analytics-settings-heading"><i class="fas fa-chart-bar" aria-hidden="true"></i> Analytics</h3>
                     <div class="settings-grid">
                         <div class="setting-card">
                             <div class="setting-icon">
-                                <i class="fas fa-sync-alt"></i>
+                                <i class="fas fa-sync-alt" aria-hidden="true"></i>
                             </div>
                             <div class="setting-content">
                                 <h4>Refresh Analytics</h4>
                                 <p>Update analytics data with the latest performance information</p>
                                 <div class="setting-actions">
                                     <button class="btn btn-secondary" onclick="refreshStatsWithFeedback()" title="Refresh analytics data">
-                                        <i class="fas fa-sync-alt"></i> Refresh
+                                        <i class="fas fa-sync-alt" aria-hidden="true"></i> Refresh
                                     </button>
                                     <div class="action-feedback" id="analytics-refresh-feedback"></div>
                                 </div>
@@ -937,37 +957,37 @@
 
                         <div class="setting-card">
                             <div class="setting-icon">
-                                <i class="fas fa-download"></i>
+                                <i class="fas fa-download" aria-hidden="true"></i>
                             </div>
                             <div class="setting-content">
                                 <h4>Export Analytics</h4>
                                 <p>Download analytics data as a JSON file for external analysis</p>
                                 <button class="btn btn-secondary" onclick="exportStats('json')" title="Export stats as JSON">
-                                    <i class="fas fa-download"></i> Export JSON
+                                    <i class="fas fa-download" aria-hidden="true"></i> Export JSON
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- App Preferences Section -->
-                <div class="settings-section">
-                    <h3><i class="fas fa-cog"></i> App Preferences</h3>
+                <section class="settings-section" aria-labelledby="app-preferences-heading">
+                    <h3 id="app-preferences-heading"><i class="fas fa-cog" aria-hidden="true"></i> App Preferences</h3>
                     <div class="settings-grid">
                         <div class="setting-card">
                             <div class="setting-icon">
-                                <i class="fas fa-moon"></i>
+                                <i class="fas fa-moon" aria-hidden="true"></i>
                             </div>
                             <div class="setting-content">
                                 <h4>Theme</h4>
                                 <p>Switch between light and dark mode</p>
                                 <button class="btn btn-secondary" onclick="toggleTheme()" title="Toggle Dark Mode">
-                                    <i class="fas fa-moon" id="settings-theme-icon"></i> Toggle Theme
+                                    <i class="fas fa-moon" id="settings-theme-icon" aria-hidden="true"></i> Toggle Theme
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </main>
@@ -1000,16 +1020,19 @@
                     </div>
                 </div>
                 
+                <!-- ARIA Live Region for Sync Announcements -->
+                <div id="sync-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+                
                 <div id="sync-setup" class="sync-setup">
                     <h3>Set Up Sync</h3>
                     <p>Choose how you want to sync with other devices:</p>
                     
                     <div class="sync-options">
                         <button class="btn btn-primary" onclick="createSyncRoom()">
-                            <i class="fas fa-plus"></i> Create Sync Room
+                            <i class="fas fa-plus" aria-hidden="true"></i> Create Sync Room
                         </button>
                         <button class="btn btn-secondary" onclick="showJoinRoom()">
-                            <i class="fas fa-sign-in-alt"></i> Join Existing Room
+                            <i class="fas fa-sign-in-alt" aria-hidden="true"></i> Join Existing Room
                         </button>
                     </div>
                 </div>
@@ -1020,7 +1043,7 @@
                     <div class="room-code">
                         <input type="text" id="room-code-display" readonly>
                         <button class="btn btn-secondary" onclick="copyRoomCode()">
-                            <i class="fas fa-copy"></i> Copy
+                            <i class="fas fa-copy" aria-hidden="true"></i> Copy
                         </button>
                     </div>
                     <p class="sync-instructions">
@@ -1034,7 +1057,7 @@
                     <div class="room-code-input">
                         <input type="text" id="room-code-input" placeholder="Enter room code" maxlength="15">
                         <button class="btn btn-primary" onclick="joinSyncRoom()">
-                            <i class="fas fa-sign-in-alt"></i> Join
+                            <i class="fas fa-sign-in-alt" aria-hidden="true"></i> Join
                         </button>
                     </div>
                 </div>
@@ -1061,9 +1084,9 @@
     <script src="musical-database.js?v=2.6.1"></script>
     <script src="restore-functions.js?v=2.6.1"></script>
     <script src="stats-system.js?v=2.6.1"></script>
-    <script src="analytics-functions.js?v=2.6.1"></script>
-    <script src="firebase-sync.js?v=2.6.1"></script>
-    <script src="app-fixed.js?v=2.6.2"></script>
+    <script src="analytics-functions.js?v=2.6.3"></script>
+    <script src="firebase-sync.js?v=2.6.3"></script>
+    <script src="app-fixed.js?v=2.6.3"></script>
     <script src="init-code.js?v=2.6.1"></script>
 </body>
 </html>

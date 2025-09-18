@@ -1,10 +1,24 @@
 // Placeholder restore function to replace Google Drive restore
 function showRestoreModal() {
+    // Store the currently focused element
+    window.lastFocusedElement = document.activeElement;
+    
     alert('To restore data:\n\n1. Click "Import JSON" to select your backup file\n2. Choose the .json backup file you downloaded earlier\n3. Click import to restore your data\n\nThis will replace all current data with the backup.');
+    
+    // Return focus after alert is dismissed
+    setTimeout(() => {
+        if (window.lastFocusedElement) {
+            window.lastFocusedElement.focus();
+            window.lastFocusedElement = null;
+        }
+    }, 100);
 }
 
 // Placeholder import modal function  
 function showImportModal() {
+    // Store the currently focused element
+    window.lastFocusedElement = document.activeElement;
+    
     // Create a hidden file input
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -61,4 +75,12 @@ function showImportModal() {
     document.body.appendChild(fileInput);
     fileInput.click();
     document.body.removeChild(fileInput);
+    
+    // Return focus after file dialog is dismissed
+    setTimeout(() => {
+        if (window.lastFocusedElement) {
+            window.lastFocusedElement.focus();
+            window.lastFocusedElement = null;
+        }
+    }, 100);
 }
