@@ -4,6 +4,8 @@ A web app for tracking theatre shows because why not? Built with vanilla HTML, C
 
 > **TL;DR**: Made this for me and my partner to track our theatre shows because I thought it would be fun. Threw it on GitHub in case anyone else wants to mess around with it. Use it, break it, improve it, or completely ignore it - whatever floats your boat! 🎭✨
 
+**Current Version:** v2.6.3 - Critical Bug Fixes & Security Improvements
+
 
 
 ## ✨ What It Does (Because Apparently We Need Features)
