@@ -72,12 +72,49 @@ class ShowAPI {
         return results;
     }
 
+    // Sanitize user input to prevent SPARQL injection attacks
+    sanitizeSparqlInput(input) {
+        if (!input || typeof input !== 'string') {
+            return '';
+        }
+        
+        // Remove or escape dangerous SPARQL characters
+        return input
+            .toLowerCase()
+            .replace(/["'`]/g, '')           // Remove quotes that could break string literals
+            .replace(/[;{}()]/g, '')         // Remove SPARQL syntax characters
+            .replace(/[<>]/g, '')            // Remove comparison operators
+            .replace(/[&|!]/g, '')           // Remove logical operators
+            .replace(/[?$]/g, '')            // Remove SPARQL variable prefixes
+            .replace(/[\\]/g, '')            // Remove backslashes
+            .replace(/[\r\n\t]/g, ' ')       // Replace newlines/tabs with spaces
+            .replace(/\s+/g, ' ')            // Normalize whitespace
+            .trim()                          // Remove leading/trailing whitespace
+            .substring(0, 100);              // Limit length to prevent abuse
+    }
+
     // Search Wikidata for shows (more accurate than Wikipedia)
     async searchWikipedia(query) {
         try {
+            // Validate input
+            if (!query || typeof query !== 'string' || query.trim().length === 0) {
+                console.warn('Invalid query provided to searchWikipedia');
+                return [];
+            }
+            
             console.log('Searching Wikidata for:', query);
             
+            // Sanitize and escape user input to prevent SPARQL injection
+            const sanitizedQuery = this.sanitizeSparqlInput(query);
+            
+            // Check if sanitization removed everything (potential attack)
+            if (!sanitizedQuery || sanitizedQuery.length === 0) {
+                console.warn('Query was completely sanitized, possible injection attempt');
+                return [];
+            }
+            
             // SPARQL query to find ONLY stage musicals (no TV, films, or sketches)
+            // SECURITY: User input is sanitized above to prevent SPARQL injection
             const sparqlQuery = `
                 SELECT DISTINCT ?item ?itemLabel ?itemDescription ?composer ?composerLabel ?lyricist ?lyricistLabel 
                        ?premiereDate ?image ?basedOn ?basedOnLabel ?genre ?genreLabel WHERE {
@@ -96,7 +133,7 @@ class ShowAPI {
                     # Must be in English
                     ?item rdfs:label ?itemLabel .
                     FILTER(LANG(?itemLabel) = "en")
-                    FILTER(CONTAINS(LCASE(?itemLabel), "${query.toLowerCase()}"))
+                    FILTER(CONTAINS(LCASE(?itemLabel), "${sanitizedQuery}"))
                     
                     # Must have composer (key requirement for musicals)
                     ?item wdt:P86 ?composer .           # Must have composer
