@@ -2075,26 +2075,23 @@ class StageLogApp {
              const label = group.querySelector('label');
              const select = group.querySelector('select');
              
-             if (label) {
+             if (label && select) {
                  const baseText = label.textContent.replace(' *', '').replace(' (optional)', '');
+                 
                  if (isFuturePerformance) {
                      label.textContent = baseText + ' (optional)';
                      label.style.color = '#666';
                      label.style.fontStyle = 'italic';
                      
                      // Remove required attribute for future performances
-                     if (select) {
-                         select.removeAttribute('required');
-                     }
+                     select.removeAttribute('required');
                  } else {
                      label.textContent = baseText + ' *';
                      label.style.color = '';
                      label.style.fontStyle = '';
                      
                      // Add required attribute for past performances
-                     if (select) {
-                         select.setAttribute('required', 'required');
-                     }
+                     select.setAttribute('required', 'required');
                  }
              }
          });
@@ -2193,13 +2190,16 @@ class StageLogApp {
                  isMusicalField.checked = true;
              }
              
-             // Reset form title and button text
-             const pageTitle = document.querySelector('#add-performance h2');
-             const submitButton = document.querySelector('#add-performance .btn-primary');
-             if (pageTitle) pageTitle.textContent = 'Add New Performance';
-             if (submitButton) submitButton.textContent = 'Save Performance';
-             
-             console.log('Form reset successfully - ready for new performance');
+            // Reset form title and button text
+            const pageTitle = document.querySelector('#add-performance h2');
+            const submitButton = document.querySelector('#add-performance .btn-primary');
+            if (pageTitle) pageTitle.textContent = 'Add New Performance';
+            if (submitButton) submitButton.textContent = 'Save Performance';
+            
+            // Call handleDateChange to properly set rating requirements based on current date
+            this.handleDateChange();
+            
+            console.log('Form reset successfully - ready for new performance');
              
          } catch (error) {
              console.error('Error resetting form:', error);
