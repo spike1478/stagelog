@@ -1783,22 +1783,34 @@ class StageLogApp {
                 'rewatch-value', 'theatre-experience', 'programme', 'atmosphere'
             ];
             
+            // Check if this is a future performance to determine rating handling
+            const performanceDate = new Date(performance.date_seen);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            performanceDate.setHours(0, 0, 0, 0);
+            const isFuturePerformance = performanceDate >= today;
+            
             ratingFields.forEach(fieldId => {
                 const element = document.getElementById(fieldId);
                 const ratingKey = fieldId.replace(/-/g, '_'); // Replace ALL hyphens with underscores
                 if (element && performance.rating[ratingKey] !== undefined) {
                     let ratingValue = performance.rating[ratingKey];
                     
-                    // If rating is 0, set to 1 (minimum valid rating) for editing
-                    if (ratingValue === 0) {
+                    // Only set 0 ratings to 1 for PAST performances (for editing purposes)
+                    // Future performances should keep 0 ratings as empty/0
+                    if (ratingValue === 0 && !isFuturePerformance) {
                         ratingValue = 1;
                     }
                     
-                    // Set the value directly
-                    element.value = ratingValue;
+                    // For future performances with 0 ratings, set to empty string
+                    if (ratingValue === 0 && isFuturePerformance) {
+                        element.value = '';
+                    } else {
+                        element.value = ratingValue;
+                    }
                     
                     // If the value wasn't set (maybe the option doesn't exist), log it
-                    if (element.value !== ratingValue.toString()) {
+                    if (element.value !== ratingValue.toString() && !isFuturePerformance) {
                         console.warn(`Could not set ${fieldId} to ${ratingValue}, closest available:`, element.value);
                     }
                 }
