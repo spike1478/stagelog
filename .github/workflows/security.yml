@@ -1,0 +1,95 @@
+name: Security Workflow
+
+on:
+  issues:
+    types: [opened, labeled]
+  security_advisory:
+    types: [published, updated]
+
+jobs:
+  security-issue-handler:
+    if: github.event.issue.labels[0].name == 'security' || github.event_name == 'security_advisory'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if security issue
+        id: check-security
+        run: |
+          if [[ "${{ github.event.issue.labels[0].name }}" == "security" ]]; then
+            echo "is_security=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_security=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add security label
+        if: steps.check-security.outputs.is_security == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['security', 'needs-triage']
+            })
+
+      - name: Comment on security issue
+        if: steps.check-security.outputs.is_security == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🛡️ **Security Issue Detected**
+
+Thank you for reporting this security issue. Our security team will review it promptly.
+
+**Next Steps:**
+- ✅ Issue has been labeled as \`security\` and \`needs-triage\`
+- 🔍 Our team will assess the vulnerability within 7 days
+- 📧 You may be contacted privately for additional details
+- 🚀 Resolution timeline depends on severity
+
+**Security Policy:** Please review our [Security Policy](https://github.com/spike1478/stagelog/blob/main/SECURITY.md) for reporting guidelines.
+
+Thank you for helping keep StageLog secure! 🎭`
+            })
+
+  dependabot-security:
+    if: github.event_name == 'security_advisory'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Handle security advisory
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log('Security advisory published:', context.payload.security_advisory);
+            
+            // Create issue for security advisory
+            const advisory = context.payload.security_advisory;
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Security Advisory: ${advisory.summary}`,
+              body: `# Security Advisory
+
+**Severity:** ${advisory.severity}
+**Summary:** ${advisory.summary}
+**Description:** ${advisory.description}
+
+**Affected Versions:**
+${advisory.vulnerabilities.map(v => `- ${v.package.name} ${v.vulnerable_version_range}`).join('\n')}
+
+**Recommendations:**
+${advisory.recommendations || 'Please update to the latest version.'}
+
+**References:**
+${advisory.references.map(ref => `- ${ref.url}`).join('\n')}
+
+---
+*This advisory was automatically generated from GitHub Security Advisories.*`,
+              labels: ['security', 'advisory', 'automated']
+            });
+            
+            console.log('Created security advisory issue:', issue.data.number);

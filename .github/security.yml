@@ -1,0 +1,59 @@
+# Security Configuration for StageLog Repository
+
+# Security Advisories Configuration
+security_advisories:
+  # Enable private vulnerability reporting
+  private_vulnerability_reporting: true
+  
+  # Allow community contributions to security advisories
+  community_contributions: false  # Set to true if you want community input
+  
+  # CVE assignment
+  cve_publication: true
+
+# Code Scanning Configuration
+code_scanning:
+  # Enable CodeQL analysis
+  codeql_analysis: true
+  
+  # Enable SARIF uploads
+  sarif_upload: true
+  
+  # Analysis frequency
+  schedule: "weekly"
+
+# Secret Scanning Configuration
+secret_scanning:
+  # Enable secret scanning
+  enabled: true
+  
+  # Push protection (prevents secrets from being pushed)
+  push_protection: true
+
+# Dependabot Configuration
+dependabot:
+  # Enable Dependabot alerts
+  alerts_enabled: true
+  
+  # Enable Dependabot security updates
+  security_updates_enabled: true
+  
+  # Enable Dependabot version updates
+  version_updates_enabled: true
+
+# Repository Security Settings
+repository_security:
+  # Require status checks before merging
+  require_status_checks: true
+  
+  # Require branches to be up to date
+  require_branches_up_to_date: true
+  
+  # Require linear history
+  require_linear_history: false  # Set to true for stricter history
+  
+  # Allow force pushes
+  allow_force_pushes: false
+  
+  # Allow deletions
+  allow_deletions: false
