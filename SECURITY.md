@@ -17,7 +17,7 @@ We actively maintain security for the following versions of StageLog:
 
 ### **How to Report:**
 
-1. **Email:** Send details to [your-email@example.com] (replace with your actual email)
+1. **Email:** Send details to [security@mayamccutcheon.com] (replace with your actual email)
 2. **Subject Line:** Use format: `[SECURITY] StageLog v[version] - [brief description]`
 3. **Include:**
    - Version of StageLog affected
@@ -84,5 +84,5 @@ We appreciate security researchers who help keep StageLog secure! Contributors w
 ---
 
 **Last Updated:** October 1, 2025  
-**Contact:** [your-email@example.com]  
+**Contact:** [security@mayamccutcheon.com]  
 **Repository:** https://github.com/spike1478/stagelog
