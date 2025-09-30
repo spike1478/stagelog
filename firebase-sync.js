@@ -15,8 +15,9 @@ class FirebaseSync {
         this.heartbeatInterval = null;
         
         // Firebase configuration
+        // NOTE: API keys should be stored securely, not hardcoded
         this.firebaseConfig = {
-            apiKey: "AIzaSyCUbRgsGEbfaOQQzXkAGjqrUeta9ioe6K0",
+            apiKey: process.env.FIREBASE_API_KEY || "REPLACE_WITH_SECURE_API_KEY",
             authDomain: "stagelog-sync.firebaseapp.com",
             databaseURL: "https://stagelog-sync-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "stagelog-sync",
