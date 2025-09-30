@@ -109,8 +109,11 @@ class StatsSystem {
         
         const totalShows = performances.length;
         
-        // Calculate total spent using the correct field names
-        const totalSpent = performances.reduce((sum, p) => {
+        // Filter out Pro Shots for spending calculations
+        const livePerformances = performances.filter(p => p.production_type !== 'Pro Shot');
+        
+        // Calculate total spent using the correct field names (only live performances)
+        const totalSpent = livePerformances.reduce((sum, p) => {
             // Validate that p is an object with the expected fields
             if (!p || typeof p !== 'object') return sum;
             
@@ -149,7 +152,7 @@ class StatsSystem {
             totalShows,
             totalSpent: totalSpent.toFixed(2),
             avgRating: avgRating.toFixed(1),
-            avgCost: totalShows > 0 ? (totalSpent / totalShows).toFixed(2) : 0,
+            avgCost: livePerformances.length > 0 ? (totalSpent / livePerformances.length).toFixed(2) : 0,
             firstShow: firstShow ? firstShow.toLocaleDateString() : 'N/A',
             lastShow: lastShow ? lastShow.toLocaleDateString() : 'N/A',
             daysSinceFirst,
@@ -163,8 +166,11 @@ class StatsSystem {
     calculateSpendingStats() {
         const performances = this.data.performances;
         
-        // Calculate total cost for each performance
-        const costs = performances.map(p => {
+        // Filter out Pro Shots for spending calculations
+        const livePerformances = performances.filter(p => p.production_type !== 'Pro Shot');
+        
+        // Calculate total cost for each live performance
+        const costs = livePerformances.map(p => {
             const ticketPrice = parseFloat(p.ticket_price) || 0;
             const bookingFee = parseFloat(p.booking_fee) || 0;
             const travelCost = parseFloat(p.travel_cost) || 0;
@@ -181,9 +187,9 @@ class StatsSystem {
             ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
             : sorted[Math.floor(sorted.length / 2)];
 
-        // Monthly spending
+        // Monthly spending (only for live performances)
         const monthlySpending = {};
-        performances.forEach(p => {
+        livePerformances.forEach(p => {
             const ticketPrice = parseFloat(p.ticket_price) || 0;
             const bookingFee = parseFloat(p.booking_fee) || 0;
             const travelCost = parseFloat(p.travel_cost) || 0;
@@ -221,7 +227,18 @@ class StatsSystem {
         const performances = this.data.performances;
         const ratings = performances.map(p => parseFloat(p.weighted_rating) || 0).filter(r => r > 0);
         
-        if (ratings.length === 0) return {};
+        if (ratings.length === 0) {
+            return {
+                average: '0.0',
+                median: '0.0',
+                min: '0.0',
+                max: '0.0',
+                distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+                monthlyAverages: {},
+                totalRated: 0,
+                percentageRated: '0.0'
+            };
+        }
 
         // Create distribution based on rating ranges (since weighted_rating is decimal)
         const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };

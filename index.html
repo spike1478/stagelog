@@ -33,8 +33,8 @@
                     <i class="fas fa-list" aria-hidden="true"></i>
                     <span>My Performances</span>
                 </button>
-                <button class="nav-btn" data-page="analytics" data-tooltip="Analytics">
-                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                <button class="nav-btn" data-page="analytics-enhanced" data-tooltip="Analytics">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
                     <span>Analytics</span>
                 </button>
                 <button class="nav-btn" data-page="access-schemes" data-tooltip="Access Schemes">
@@ -44,6 +44,10 @@
                 <button class="nav-btn" data-page="settings" data-tooltip="Settings">
                     <i class="fas fa-cog" aria-hidden="true"></i>
                     <span>Settings</span>
+                </button>
+                <button class="nav-btn" data-page="analytics" data-tooltip="Legacy Analytics">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                    <span>Legacy Analytics</span>
                 </button>
             </div>
             <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode" aria-label="Toggle theme">
@@ -524,11 +528,17 @@
             </form>
         </div>
 
-        <!-- Analytics Page -->
+        <!-- Legacy Analytics Page -->
         <div id="analytics" class="page analytics-page">
             <div class="page-header">
-                <h2>📊 Performance Analytics</h2>
-                <p>Discover deep insights from your theatre journey</p>
+                <h2>📊 Legacy Performance Analytics</h2>
+                <p>Discover deep insights from your theatre journey (Legacy Version)</p>
+                <div class="deprecation-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="warning-content">
+                        <strong>⚠️ Deprecation Notice:</strong> This legacy analytics page will be removed in a future version. All data and features are being migrated to the main Analytics page. Please use the main Analytics page for the most up-to-date features and improved functionality.
+                    </div>
+                </div>
                 <div class="analytics-controls">
                     <button class="btn btn-secondary" onclick="refreshStats()" title="Refresh analytics data">
                         <i class="fas fa-sync-alt"></i> Refresh
@@ -798,6 +808,381 @@
                         <div id="price-ranges" class="price-ranges-grid">
                             <!-- Price ranges will be populated here -->
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div id="analytics-enhanced" class="page analytics-page">
+            <div class="page-header">
+                <h2>📊 Performance Analytics</h2>
+                <p>Detailed insights with separate Pro Shot and Live Performance analysis</p>
+                <div class="analytics-controls">
+                    <button class="btn btn-secondary" onclick="refreshEnhancedAnalytics()" title="Refresh analytics data">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportEnhancedStats('json')" title="Export stats as JSON">
+                        <i class="fas fa-download" aria-hidden="true"></i> Export JSON
+                    </button>
+                </div>
+            </div>
+
+            <div class="analytics-container">
+                <!-- View Toggle -->
+                <div class="view-toggle">
+                    <button class="btn btn-primary" onclick="switchAnalyticsView('overview')" id="overview-btn">Overview</button>
+                    <button class="btn btn-secondary" onclick="switchAnalyticsView('live')" id="live-btn">Live Performances</button>
+                    <button class="btn btn-secondary" onclick="switchAnalyticsView('proshot')" id="proshot-btn">Pro Shots</button>
+                    <button class="btn btn-secondary" onclick="switchAnalyticsView('comparison')" id="comparison-btn">Comparison</button>
+                </div>
+
+                <!-- Overview View -->
+                <div id="analytics-overview" class="analytics-view">
+                    <div class="enhanced-overview">
+                        <div class="overview-stats">
+                            <div class="overview-stat">
+                                <div class="stat-value" id="enhanced-total-performances">0</div>
+                                <div class="stat-label">Total Performances</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="stat-value" id="enhanced-live-performances">0</div>
+                                <div class="stat-label">Live Performances</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="stat-value" id="enhanced-pro-shot-performances">0</div>
+                                <div class="stat-label">Pro Shots</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="stat-value" id="enhanced-upcoming-performances">0</div>
+                                <div class="stat-label">Upcoming</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Insights -->
+                    <section class="insights-section" aria-labelledby="enhanced-insights-heading">
+                        <h3 id="enhanced-insights-heading">💡 Key Insights</h3>
+                        <div id="enhanced-insights-container" class="insights-grid">
+                            <!-- Insights will be populated here -->
+                        </div>
+                    </section>
+
+                    <!-- Achievements -->
+                    <section class="achievements-section" aria-labelledby="enhanced-achievements-heading">
+                        <h3 id="enhanced-achievements-heading">🏆 Achievements</h3>
+                        <div id="enhanced-achievements-container" class="achievements-grid">
+                            <!-- Achievements will be populated here -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Live Performances View -->
+                <div id="analytics-live" class="analytics-view hidden">
+                    <div class="live-card">
+                        <h3>🎭 Live Performances</h3>
+                        <div class="live-stats">
+                            <div class="live-stat">
+                                <div class="stat-value" id="live-total-count">0</div>
+                                <div class="stat-label">Total Live Shows</div>
+                            </div>
+                            <div class="live-stat">
+                                <div class="stat-value" id="live-average-rating">0.0</div>
+                                <div class="stat-label">Average Rating</div>
+                            </div>
+                            <div class="live-stat">
+                                <div class="stat-value" id="live-average-cost">£0.00</div>
+                                <div class="stat-label">Average Cost</div>
+                            </div>
+                            <div class="live-stat">
+                                <div class="stat-value" id="live-total-spent">£0.00</div>
+                                <div class="stat-label">Total Spent</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rating Distribution -->
+                    <div class="rating-distribution">
+                        <h3>📊 Live Performance Rating Distribution</h3>
+                        <div id="enhanced-live-rating-distribution" class="rating-bars">
+                            <!-- Rating distribution will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Price Range Analysis -->
+                    <div class="price-analysis">
+                        <h3>💷 Live Performance Price Range Analysis</h3>
+                        <div id="enhanced-live-price-ranges" class="price-ranges-grid">
+                            <!-- Price ranges will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pro Shot View -->
+                <div id="analytics-proshot" class="analytics-view hidden">
+                    <div class="proshot-card">
+                        <div class="proshot-stats">
+                            <div class="proshot-stat">
+                                <div class="stat-value" id="proshot-total-count">0</div>
+                                <div class="stat-label">Total Pro Shots</div>
+                            </div>
+                            <div class="proshot-stat">
+                                <div class="stat-value" id="proshot-average-rating">0.0</div>
+                                <div class="stat-label">Average Rating</div>
+                            </div>
+                            <div class="proshot-stat">
+                                <div class="stat-value" id="proshot-best-rating">0.0</div>
+                                <div class="stat-label">Best Rating</div>
+                            </div>
+                            <div class="proshot-stat">
+                                <div class="stat-value" id="proshot-recent-count">0</div>
+                                <div class="stat-label">This Year</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pro Shot Rating Distribution -->
+                    <div class="rating-distribution">
+                        <h3>📊 Pro Shot Rating Distribution</h3>
+                        <div id="enhanced-proshot-rating-distribution" class="rating-bars">
+                            <!-- Rating distribution will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison View -->
+                <div id="analytics-comparison" class="analytics-view hidden">
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4>Live vs Pro Shot Comparison</h4>
+                            <div class="comparison-stats">
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="comparison-live-count">0</div>
+                                    <div class="stat-label">Live Performances</div>
+                                </div>
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="comparison-proshot-count">0</div>
+                                    <div class="stat-label">Pro Shots</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>Average Ratings</h4>
+                            <div class="comparison-stats">
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="comparison-live-rating">0.0</div>
+                                    <div class="stat-label">Live Average</div>
+                                </div>
+                                <div class="comparison-stat">
+                                    <div class="stat-number" id="comparison-proshot-rating">0.0</div>
+                                    <div class="stat-label">Pro Shot Average</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Year-over-Year Comparison -->
+                    <div class="comparison-section">
+                        <h3>📅 Year-over-Year Comparison</h3>
+                        <div class="comparison-grid">
+                            <div class="comparison-card">
+                                <h4>This Year</h4>
+                                <div class="comparison-stats">
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-this-year-shows">0</div>
+                                        <div class="stat-label">Performances</div>
+                                    </div>
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-this-year-spent">£0.00</div>
+                                        <div class="stat-label">Spent</div>
+                                    </div>
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-this-year-rating">0.0</div>
+                                        <div class="stat-label">Avg Rating</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comparison-card">
+                                <h4>Last Year</h4>
+                                <div class="comparison-stats">
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-last-year-shows">0</div>
+                                        <div class="stat-label">Performances</div>
+                                    </div>
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-last-year-spent">£0.00</div>
+                                        <div class="stat-label">Spent</div>
+                                    </div>
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-last-year-rating">0.0</div>
+                                        <div class="stat-label">Avg Rating</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comparison-card">
+                                <h4>Change</h4>
+                                <div class="comparison-stats">
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-shows-change">0%</div>
+                                        <div class="stat-label">Performances</div>
+                                    </div>
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-spending-change">0%</div>
+                                        <div class="stat-label">Spending</div>
+                                    </div>
+                                    <div class="comparison-stat">
+                                        <div class="stat-number" id="enhanced-rating-change">0%</div>
+                                        <div class="stat-label">Rating</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Analytics (Always Visible) -->
+                <div class="additional-analytics">
+                    <!-- Detailed Stats Grid -->
+                    <section class="detailed-stats" aria-label="Detailed performance statistics">
+                        <section class="stats-section" aria-labelledby="enhanced-spending-analysis-heading">
+                            <h3 id="enhanced-spending-analysis-heading">💰 Live Performance Spending Analysis</h3>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">💸</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-avg-cost">£0.00</div>
+                                        <div class="stat-label">Average Cost</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">📊</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-median-cost">£0.00</div>
+                                        <div class="stat-label">Median Cost</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">💎</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-max-cost">£0.00</div>
+                                        <div class="stat-label">Most Expensive</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🎯</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-min-cost">£0.00</div>
+                                        <div class="stat-label">Least Expensive</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="stats-section" aria-labelledby="enhanced-cost-per-ticket-heading">
+                            <h3 id="enhanced-cost-per-ticket-heading">🎫 Live Performance Cost Per Ticket</h3>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">💸</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-avg-cost-per-ticket">£0.00</div>
+                                        <div class="stat-label">Average Cost Per Ticket</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">📊</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-median-cost-per-ticket">£0.00</div>
+                                        <div class="stat-label">Median Cost Per Ticket</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">💎</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-max-cost-per-ticket">£0.00</div>
+                                        <div class="stat-label">Most Expensive Per Ticket</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🎯</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-min-cost-per-ticket">£0.00</div>
+                                        <div class="stat-label">Least Expensive Per Ticket</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="stats-section" aria-labelledby="enhanced-rating-analysis-heading">
+                            <h3 id="enhanced-rating-analysis-heading">⭐ Rating Analysis</h3>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">📈</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-rating-avg">0.0</div>
+                                        <div class="stat-label">Average Rating</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">📊</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-rating-median">0.0</div>
+                                        <div class="stat-label">Median Rating</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🎯</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-rating-percentage">0%</div>
+                                        <div class="stat-label">Performances Rated</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">⭐</div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="enhanced-five-stars">0</div>
+                                        <div class="stat-label">5-Star Performances</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="stats-section" aria-labelledby="enhanced-venue-analysis-heading">
+                            <h3 id="enhanced-venue-analysis-heading">🏛️ Venue Analysis</h3>
+                            <div class="venue-stats">
+                                <div class="venue-summary">
+                                    <div class="venue-stat">
+                                        <div class="stat-number" id="enhanced-total-venues">0</div>
+                                        <div class="stat-label">Unique Venues</div>
+                                    </div>
+                                    <div class="venue-stat">
+                                        <div class="stat-number" id="enhanced-most-frequent-venue">-</div>
+                                        <div class="stat-label">Most Visited</div>
+                                    </div>
+                                </div>
+                                <div id="enhanced-top-venues" class="top-venues-list">
+                                    <!-- Top venues will be populated here -->
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="stats-section" aria-labelledby="enhanced-performance-analysis-heading">
+                            <h3 id="enhanced-performance-analysis-heading">🎪 Performance Analysis</h3>
+                            <div class="show-stats">
+                                <div class="show-summary">
+                                    <div class="show-stat">
+                                        <div class="stat-number" id="enhanced-unique-shows">0</div>
+                                        <div class="stat-label">Unique Shows</div>
+                                    </div>
+                                    <div class="show-stat">
+                                        <div class="stat-number" id="enhanced-repeat-percentage">0%</div>
+                                        <div class="stat-label">Repeat Shows</div>
+                                    </div>
+                                </div>
+                                <div id="enhanced-top-shows" class="top-shows-list">
+                                    <!-- Top shows will be populated here -->
+                                </div>
+                            </div>
+                        </section>
+                    </section>
                 </div>
             </div>
         </div>
@@ -1087,6 +1472,7 @@
     <script src="analytics-functions.js?v=2.6.3"></script>
     <script src="firebase-sync.js?v=2.6.3"></script>
     <script src="app-fixed.js?v=2.6.3"></script>
+    <script src="enhanced-analytics-functions.js?v=2.6.3"></script>
     <script src="init-code.js?v=2.6.3"></script>
 </body>
 </html>

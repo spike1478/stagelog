@@ -4,7 +4,9 @@ A web app for tracking theatre shows because why not? Built with vanilla HTML, C
 
 > **TL;DR**: Made this for me and my partner to track our theatre shows because I thought it would be fun. Threw it on GitHub in case anyone else wants to mess around with it. Use it, break it, improve it, or completely ignore it - whatever floats your boat! 🎭✨
 
-**Current Version:** v2.6.3 - Critical Bug Fixes & Security Improvements
+**Current Version:** v2.7.0 - Enhanced Analytics & Pro Shot Features
+
+> **Latest Update:** Added completely redesigned analytics system with Pro Shot separation, fixed critical bugs with future performance ratings and spending calculations, and improved navigation system!
 
 
 
@@ -19,11 +21,15 @@ A web app for tracking theatre shows because why not? Built with vanilla HTML, C
 - **Edit Ratings**: Update your ratings anytime - no more being stuck with first impressions!
 
 ### 📊 Analytics (Because Data is Fun)
+- **Enhanced Analytics**: Completely redesigned analytics system with modern UI
+- **Pro Shot Separation**: Pro Shots tracked separately from live performances
+- **Accurate Spending Stats**: Live theatre costs calculated independently (no Pro Shot contamination)
 - **Stats Galore**: How many shows? How much money? How many regrets?
 - **Spending Reality Check**: Detailed breakdowns of how much you've spent on culture
 - **Venue & Show Stats**: Which theatre do you visit most? (Probably the cheap one)
 - **Year-over-Year**: Watch your theatre addiction grow over time
-- **Achievements**: Silly badges for doing theatre things (because why not?)
+- **Enhanced Achievements**: Expanded achievement system with Pro Shot-specific milestones
+- **Legacy Analytics**: Old analytics system still available (but deprecated)
 
 ### 🎨 User Experience (Because We're Not Monsters)
 - **Dark/Light Mode**: Because staring at bright screens at 2am is painful

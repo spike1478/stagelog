@@ -6,7 +6,7 @@
  * advanced analytics, and mobile-responsive design.
  * 
  * @class StageLogApp
- * @version 2.5.0
+ * @version 2.7.0
  * @author StageLog Development Team
  * @since 2024
  */
@@ -28,7 +28,6 @@ class StageLogApp {
         /** @type {string|null} ID of performance being edited */
         this.editingPerformanceId = null;
         
-        console.log('🎭 StageLog Application initialized');
     }
     
     // Convert technical field names to user-friendly names
@@ -65,7 +64,6 @@ class StageLogApp {
             this.loadCityFilter();
             this.filterPerformances();
             this.loadDashboardAnalytics(); // Use dashboard-specific analytics
-            console.log('📊 Dashboard loaded successfully');
         } catch (error) {
             console.error('❌ Error loading dashboard:', error);
         }
@@ -104,7 +102,6 @@ class StageLogApp {
                 window.statsSystem.loadData().then(() => {
                     window.statsSystem.calculateAllStats();
                     this.updateDashboardFromStats();
-                    console.log('📊 Dashboard analytics refreshed with latest data');
                 }).catch(error => {
                     console.error('❌ Error refreshing dashboard stats:', error);
                     // Fallback to basic stats
@@ -112,7 +109,6 @@ class StageLogApp {
                 });
             } else {
                 // Stats system not ready, use basic stats
-                console.log('📊 Stats system not ready, using basic dashboard stats');
                 this.updateBasicDashboardStats();
             }
         } catch (error) {
@@ -164,7 +160,6 @@ class StageLogApp {
     updateBasicDashboardStats() {
         try {
             const performances = window.db.getPerformances();
-            console.log('📊 Updating dashboard stats');
             
             // Total performances (completed only)
             const totalElement = document.getElementById('total-performances');
@@ -341,7 +336,10 @@ class StageLogApp {
     // Update expense statistics
     updateExpenseStats(performances) {
         try {
-            const performancesWithCosts = performances.filter(p => 
+            // Filter out Pro Shots for expense calculations
+            const livePerformances = performances.filter(p => p.production_type !== 'Pro Shot');
+            
+            const performancesWithCosts = livePerformances.filter(p => 
                 (p.ticket_price && parseFloat(p.ticket_price) > 0) ||
                 (p.booking_fee && parseFloat(p.booking_fee) > 0) ||
                 (p.travel_cost && parseFloat(p.travel_cost) > 0) ||
@@ -606,12 +604,20 @@ class StageLogApp {
                     window.updateStatsPage();
                     console.log('📊 Analytics refreshed with latest data');
                 }
+                
+                // Also call the old rating distribution function as backup
+                const performances = window.db ? window.db.getPerformances() : [];
+                this.renderRatingDistribution(performances);
             }).catch(error => {
                 console.error('❌ Error refreshing stats:', error);
                 // Fallback to just updating the page
                 if (window.updateStatsPage) {
                     window.updateStatsPage();
                 }
+                
+                // Also call the old rating distribution function as backup
+                const performances = window.db ? window.db.getPerformances() : [];
+                this.renderRatingDistribution(performances);
             });
         } else if (window.statsSystem && !window.statsSystem.isInitialized) {
             // Stats system exists but not initialized yet, wait for it
@@ -738,22 +744,13 @@ class StageLogApp {
 
     // Filter performances for My Shows page
     filterMyShowsPerformances() {
-        console.log('🔍 DEBUG: filterMyShowsPerformances called');
         
         const searchFilter = document.getElementById('my-shows-search-filter');
         const sortFilter = document.getElementById('my-shows-sort-filter');
         const cityFilter = document.getElementById('my-shows-city-filter');
         const expenseFilter = document.getElementById('my-shows-expense-filter');
         
-        console.log('🔍 DEBUG: Filter elements found:', {
-            searchFilter: !!searchFilter,
-            sortFilter: !!sortFilter,
-            cityFilter: !!cityFilter,
-            expenseFilter: !!expenseFilter
-        });
-        
         if (!searchFilter || !sortFilter || !cityFilter || !expenseFilter) {
-            console.error('❌ DEBUG: Missing filter elements, returning early');
             return;
         }
         
@@ -764,10 +761,8 @@ class StageLogApp {
             expense: expenseFilter.value
         };
 
-        console.log('🔍 DEBUG: Filter values:', filters);
 
         let performances = window.db.getPerformances();
-        console.log('🔍 DEBUG: Total performances from DB:', performances.length);
 
         // Apply filters (same logic as filterPerformances)
         if (filters.search) {
@@ -825,30 +820,23 @@ class StageLogApp {
             }
         });
 
-        console.log('🔍 DEBUG: Final filtered performances count:', performances.length);
         this.renderMyShowsPerformances(performances);
     }
 
     // Render all performances for My Shows page
     renderMyShowsPerformances(performances) {
-        console.log('🔍 DEBUG: renderMyShowsPerformances called with', performances.length, 'performances');
         
         const container = document.getElementById('my-shows-all-performances');
-        console.log('🔍 DEBUG: Container element found:', !!container);
         
         if (container) {
             if (performances.length === 0) {
-                console.log('🔍 DEBUG: No performances, showing empty state');
                 container.innerHTML = '<p class="empty-state">No performances found. <a href="#" onclick="switchPage(\'add-performance\')">Add your first performance!</a></p>';
             } else {
-                console.log('🔍 DEBUG: Generating performance cards for', performances.length, 'performances');
                 const cards = performances.map(p => this.generatePerformanceCard(p));
-                console.log('🔍 DEBUG: Generated', cards.length, 'cards');
                 container.innerHTML = cards.join('');
-                console.log('🔍 DEBUG: HTML set to container');
             }
         } else {
-            console.error('❌ DEBUG: Container element not found!');
+            console.error('❌ Container element not found!');
         }
     }
 
@@ -1614,44 +1602,53 @@ class StageLogApp {
         const container = document.getElementById('rating-distribution');
         if (!container) return;
 
-        const ratingRanges = {
-            '4.5 - 5.0': 0, '4.0 - 4.4': 0, '3.5 - 3.9': 0, '3.0 - 3.4': 0,
-            '2.5 - 2.9': 0, '2.0 - 2.4': 0, '1.5 - 1.9': 0, '1.0 - 1.4': 0, '0.0 - 0.9': 0
-        };
+        // Filter to only rated performances
+        const ratedPerformances = performances.filter(p => (p.weighted_rating || 0) > 0);
+        
+        if (ratedPerformances.length === 0) {
+            container.innerHTML = '<div class="rating-bar"><div class="rating-label">No ratings yet</div></div>';
+            return;
+        }
 
-        performances.forEach(p => {
-            const rating = p.weighted_rating;
-            if (rating >= 4.5) ratingRanges['4.5 - 5.0']++;
-            else if (rating >= 4.0) ratingRanges['4.0 - 4.4']++;
-            else if (rating >= 3.5) ratingRanges['3.5 - 3.9']++;
-            else if (rating >= 3.0) ratingRanges['3.0 - 3.4']++;
-            else if (rating >= 2.5) ratingRanges['2.5 - 2.9']++;
-            else if (rating >= 2.0) ratingRanges['2.0 - 2.4']++;
-            else if (rating >= 1.5) ratingRanges['1.5 - 1.9']++;
-            else if (rating >= 1.0) ratingRanges['1.0 - 1.4']++;
-            else ratingRanges['0.0 - 0.9']++;
+        // Create distribution based on star ratings (like the new system)
+        const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        ratedPerformances.forEach(p => {
+            const rating = parseFloat(p.weighted_rating) || 0;
+            if (rating >= 4.5) distribution[5]++;
+            else if (rating >= 3.5) distribution[4]++;
+            else if (rating >= 2.5) distribution[3]++;
+            else if (rating >= 1.5) distribution[2]++;
+            else if (rating >= 0.5) distribution[1]++;
         });
 
-        const total = performances.length;
-        let html = '<div class="bar-chart">';
+        const total = ratedPerformances.length;
         
-        Object.entries(ratingRanges).forEach(([range, count]) => {
-            if (count > 0) {
-                const percentage = (count / total * 100).toFixed(2);
-                html += `
-                    <div class="bar-item">
-                        <div class="bar-label">${range}</div>
-                        <div class="bar-container">
-                            <div class="bar-fill" style="width: ${percentage}%"></div>
+        // Generate HTML using the same structure as the new system
+        const distributionText = [5, 4, 3, 2, 1].map(rating => {
+            const count = distribution[rating] || 0;
+            const percentage = total > 0 ? (count / total) * 100 : 0;
+            return `${count} performances rated ${rating} stars (${percentage.toFixed(1)}%)`;
+        }).join(', ');
+        
+        container.innerHTML = `
+            <div class="sr-only" aria-live="polite" id="rating-distribution-description">
+                Rating distribution: ${distributionText}. Total performances rated: ${total}.
+            </div>
+            ${[5, 4, 3, 2, 1].map(rating => {
+                const count = distribution[rating] || 0;
+                const percentage = total > 0 ? (count / total) * 100 : 0;
+                
+                return `
+                    <div class="rating-bar" role="img" aria-label="${count} performances rated ${rating} stars, ${percentage.toFixed(1)}% of total">
+                        <div class="rating-label">${rating} ⭐</div>
+                        <div class="rating-progress">
+                            <div class="rating-fill" style="width: ${percentage}%"></div>
                         </div>
-                        <div class="bar-value">${count}</div>
+                        <div class="rating-count">${count}</div>
                     </div>
                 `;
-            }
-        });
-        
-        html += '</div>';
-        container.innerHTML = html;
+            }).join('')}
+        `;
     }
 
     renderMonthlyActivity(performances) {
@@ -2831,17 +2828,13 @@ class StageLogApp {
 
 // Load My Shows page
 function loadMyShows() {
-    console.log('🔍 DEBUG: loadMyShows called');
     try {
         // Load city filter for My Shows page
-        console.log('🔍 DEBUG: Loading city filter');
         loadMyShowsCityFilter();
         // Filter and render performances
-        console.log('🔍 DEBUG: Filtering performances');
         window.app.filterMyShowsPerformances();
-        console.log('📋 DEBUG: My Shows page loaded successfully');
     } catch (error) {
-        console.error('❌ DEBUG: Error loading My Shows page:', error);
+        console.error('❌ Error loading My Shows page:', error);
     }
 }
 

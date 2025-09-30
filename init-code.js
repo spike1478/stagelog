@@ -23,9 +23,11 @@ function switchPage(pageId) {
     if (pageId === 'dashboard') {
         window.app.loadDashboard();
     } else if (pageId === 'my-shows') {
-        window.app.loadMyShows();
+        loadMyShows();
     } else if (pageId === 'analytics') {
         window.app.loadAnalytics();
+    } else if (pageId === 'analytics-enhanced') {
+        loadEnhancedAnalytics();
     }
 }
 

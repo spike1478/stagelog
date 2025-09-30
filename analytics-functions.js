@@ -41,6 +41,7 @@ function exportStats(format = 'json') {
  * Update the analytics page with current stats data
  */
 function updateStatsPage() {
+    
     if (!window.statsSystem || !window.statsSystem.isInitialized) {
         console.warn('📊 Stats system not ready, attempting to initialize...');
         if (typeof StatsSystem !== 'undefined' && !window.statsSystem) {
@@ -55,6 +56,9 @@ function updateStatsPage() {
     }
 
     const stats = window.statsSystem.stats;
+    console.log('🔍 Stats data:', stats);
+    console.log('🔍 Ratings data:', stats?.ratings);
+    
     if (!stats) {
         console.warn('📊 No stats data available');
         return;
@@ -335,10 +339,28 @@ function updateComparisonStats(comparisons) {
  * Update rating distribution chart
  */
 function updateRatingDistribution(ratings) {
+    
     const container = document.getElementById('rating-distribution');
-    if (!container || !ratings || !ratings.distribution) return;
+    
+    if (!container) {
+        console.warn('❌ Rating distribution container not found!');
+        return;
+    }
+    
+    if (!ratings) {
+        console.warn('❌ No ratings data provided');
+        container.innerHTML = '<div class="rating-bar"><div class="rating-label">No ratings data</div></div>';
+        return;
+    }
+    
+    if (!ratings.distribution) {
+        console.warn('❌ No ratings distribution data:', ratings);
+        container.innerHTML = '<div class="rating-bar"><div class="rating-label">No distribution data</div></div>';
+        return;
+    }
     
     const total = ratings.totalRated || 0;
+    
     if (total === 0) {
         container.innerHTML = '<div class="rating-bar"><div class="rating-label">No ratings yet</div></div>';
         return;

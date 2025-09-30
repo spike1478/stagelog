@@ -947,8 +947,10 @@ class StageLogDB {
     // Comprehensive expense analytics
     getExpenseStatistics() {
         const performances = this.getPerformances();
-        // Include ALL performances with expense data, not just past ones
-        const performancesWithExpenses = performances.filter(perf => {
+        // Filter out Pro Shots for expense calculations
+        const livePerformances = performances.filter(p => p.production_type !== 'Pro Shot');
+        // Include only live performances with expense data, not just past ones
+        const performancesWithExpenses = livePerformances.filter(perf => {
             const totalCost = (perf.ticket_price || 0) + (perf.booking_fee || 0) + 
                             (perf.travel_cost || 0) + (perf.other_expenses || 0);
             return totalCost > 0;
