@@ -108,7 +108,7 @@ The app works out of the box with the included Firebase configuration. Your data
    - Replace the `firebaseConfig` object with your own configuration:
    ```javascript
    this.firebaseConfig = {
-       apiKey: "your-api-key",
+       apiKey: "your-api-key-here",
        authDomain: "your-project.firebaseapp.com",
        databaseURL: "https://your-project-default-rtdb.europe-west1.firebasedatabase.app",
        projectId: "your-project-id",
@@ -117,6 +117,8 @@ The app works out of the box with the included Firebase configuration. Your data
        appId: "your-app-id"
    };
    ```
+
+   **⚠️ Security Note**: Never commit API keys to version control. For production deployments, use environment variables or secure configuration management.
 
 5. **Secure Your Database** (Important!):
    - In Firebase Console → Realtime Database → Rules
@@ -145,6 +147,27 @@ The app works out of the box with the included Firebase configuration. Your data
 - **Custom Security Rules**: Set your own access controls
 - **No Shared Resources**: No dependency on the default Firebase project
 - **Full Transparency**: You can see exactly what data is stored and when
+
+## 🔐 Secure Deployment Practices
+
+### API Key Security
+- **Never commit API keys** to version control or public repositories
+- **Use environment variables** for production deployments
+- **Restrict API keys** with domain and service restrictions in Google Cloud Console
+- **Rotate API keys** regularly and revoke compromised keys immediately
+
+### Production Deployment Checklist
+1. **Create restricted API keys** with domain limitations
+2. **Use secure configuration management** (environment variables, secrets)
+3. **Test locally first** before deploying to production
+4. **Monitor API key usage** for unauthorized access
+5. **Keep Firebase security rules updated** and restrictive
+
+### For Different Hosting Platforms:
+- **Netlify**: Use environment variables in site settings
+- **Vercel**: Use environment variables in project settings  
+- **GitHub Pages**: Use GitHub Actions with secrets for deployment
+- **Self-hosted**: Use server environment variables or configuration files
 
 ## 🔒 Security & Privacy
 
@@ -227,13 +250,12 @@ stagelog/
 ├── firebase-sync.js        # Firebase real-time sync functionality
 ├── stats-system.js         # Analytics and statistics engine
 ├── analytics-functions.js  # Analytics page functions
+├── enhanced-analytics-functions.js # Enhanced analytics system
 ├── csv-import.js           # CSV import functionality
 ├── import-performances.js  # Performance import functions
 ├── musical-database.js     # Musical database and show data
 ├── restore-functions.js    # Data restore and backup functions
 ├── init-code.js            # Initialization code
-├── test-data.json          # Sample data for testing
-├── backup.ps1              # Backup script
 ├── docker-compose.yml      # Docker container setup
 ├── nginx.conf              # Nginx configuration
 ├── favicon.svg             # Site icon
@@ -241,9 +263,12 @@ stagelog/
 ├── LICENSE                 # MIT License
 ├── CONTRIBUTING.md         # Contribution guidelines
 ├── CHANGELOG.md            # Version history
-├── AI-DECLARATION.md       # AI usage transparency
+├── SECURITY.md             # Security policy and vulnerability reporting
+├── FIREBASE-SETUP.md       # Firebase configuration guide
+├── RELEASE-v2.7.0.md       # Release notes for current version
 ├── UNRAID-SETUP.md         # Unraid deployment guide
 └── docs/                   # Additional documentation
+    ├── AI-DECLARATION.md   # AI usage transparency
     ├── ACCESSIBILITY.md    # Accessibility compliance
     ├── GDPR.md            # Privacy compliance
     ├── PRIVACY-POLICY.md  # Privacy policy
@@ -303,5 +328,5 @@ This project was built with AI assistance because we're not coding gods. For ful
 
 **Made with ❤️ for theatre lovers everywhere**
 
-*StageLog v2.6.0 - Track your theatre journey, one performance at a time.*  
-*Last updated: September 18, 2025*
+*StageLog v2.7.0 - Track your theatre journey, one performance at a time.*  
+*Last updated: October 1, 2025*
