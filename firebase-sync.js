@@ -17,7 +17,7 @@ class FirebaseSync {
         // Firebase configuration
         // NOTE: API keys should be stored securely, not hardcoded
         this.firebaseConfig = {
-            apiKey: "PASTE_YOUR_NEW_API_KEY_HERE",
+            apiKey: "AIzaSyA9Z23hKFoMx3lYDCSGCPsDnHUUhOQ01_I",
             authDomain: "stagelog-sync.firebaseapp.com",
             databaseURL: "https://stagelog-sync-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "stagelog-sync",
