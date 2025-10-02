@@ -93,3 +93,4 @@ ${advisory.references.map(ref => `- ${ref.url}`).join('\n')}
             });
             
             console.log('Created security advisory issue:', issue.data.number);
+

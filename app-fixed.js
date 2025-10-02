@@ -3461,7 +3461,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize classes
         window.db = new StageLogDB();
         window.api = new ShowAPI();
-        window.csvImporter = new CSVImporter();
+        
+        // Initialize CSVImporter safely
+        if (typeof CSVImporter !== 'undefined') {
+            window.csvImporter = new CSVImporter();
+        } else {
+            console.warn('CSVImporter not available - CSV import features disabled');
+            window.csvImporter = null;
+        }
+        
         window.app = new StageLogApp();
         
         console.log('Classes initialized');

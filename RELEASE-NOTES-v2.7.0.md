@@ -196,3 +196,4 @@ Future releases will continue to enhance:
 This release introduces a completely redesigned analytics system with separate tracking for Pro Shots and Live Performances, ensuring accurate statistics and providing users with enhanced insights into their theatre experiences.
 
 Thank you for using StageLog! 🎭✨
+

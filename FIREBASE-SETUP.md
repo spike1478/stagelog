@@ -70,3 +70,4 @@ Set environment variables on your hosting platform:
 3. Code uses environment variables (not hardcoded)
 4. `.env` file is in `.gitignore`
 5. GitHub security alert is resolved
+

@@ -1,0 +1,228 @@
+warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/index.html b/index.html[m
+[1mindex bf91166..12d6943 100644[m
+[1m--- a/index.html[m
+[1m+++ b/index.html[m
+[36m@@ -37,6 +37,10 @@[m
+                     <i class="fas fa-chart-bar" aria-hidden="true"></i>[m
+                     <span>Analytics</span>[m
+                 </button>[m
+[32m+[m[32m                <button class="nav-btn" data-page="analytics-enhanced" data-tooltip="Enhanced Analytics">[m
+[32m+[m[32m                    <i class="fas fa-chart-line" aria-hidden="true"></i>[m
+[32m+[m[32m                    <span>Enhanced Analytics</span>[m
+[32m+[m[32m                </button>[m
+                 <button class="nav-btn" data-page="access-schemes" data-tooltip="Access Schemes">[m
+                     <i class="fas fa-universal-access" aria-hidden="true"></i>[m
+                     <span>Access Schemes</span>[m
+[36m@@ -226,6 +230,7 @@[m
+                                 <option value="Pro Shot">Pro Shot</option>[m
+                                 <option value="Regional">Regional</option>[m
+                                 <option value="Fringe">Fringe</option>[m
+[32m+[m[32m                                <option value="Comedy">Comedy</option>[m
+                             </select>[m
+                         </div>[m
+                     </div>[m
+[36m@@ -802,6 +807,382 @@[m
+             </div>[m
+         </div>[m
+ [m
+[32m+[m[32m        <!-- Enhanced Analytics Page -->[m
+[32m+[m[32m        <div id="analytics-enhanced" class="page analytics-page">[m
+[32m+[m[32m            <div class="page-header">[m
+[32m+[m[32m                <h2>📊 Enhanced Performance Analytics</h2>[m
+[32m+[m[32m                <p>Detailed insights with separate Pro Shot and Live Performance analysis</p>[m
+[32m+[m[32m                <div class="analytics-controls">[m
+[32m+[m[32m                    <button class="btn btn-secondary" onclick="refreshEnhancedAnalytics()" title="Refresh enhanced analytics data">[m
+[32m+[m[32m                        <i class="fas fa-sync-alt"></i> Refresh[m
+[32m+[m[32m                    </button>[m
+[32m+[m[32m                    <button class="btn btn-secondary" onclick="exportEnhancedStats('json')" title="Export enhanced stats as JSON">[m
+[32m+[m[32m                        <i class="fas fa-download" aria-hidden="true"></i> Export JSON[m
+[32m+[m[32m                    </button>[m
+[32m+[m[32m                </div>[m
+[32m+[m[32m            </div>[m
+[32m+[m
+[32m+[m[32m            <div class="analytics-container">[m
+[32m+[m[32m                <!-- View Toggle -->[m
+[32m+[m[32m                <div class="view-toggle">[m
+[32m+[m[32m                    <button class="btn btn-primary" onclick="switchAnalyticsView('overview')" id="overview-btn">Overview</button>[m
+[32m+[m[32m                    <button class="btn btn-secondary" onclick="switchAnalyticsView('live')" id="live-btn">Live Performances</button>[m
+[32m+[m[32m                    <button class="btn btn-secondary" onclick="switchAnalyticsView('proshot')" id="proshot-btn">Pro Shots</button>[m
+[32m+[m[32m                    <button class="btn btn-secondary" onclick="switchAnalyticsView('comparison')" id="comparison-btn">Comparison</button>[m
+[32m+[m[32m                </div>[m
+[32m+[m
+[32m+[m[32m                <!-- Overview View -->[m
+[32m+[m[32m                <div id="analytics-overview" class="analytics-view">[m
+[32m+[m[32m                    <div class="enhanced-overview">[m
+[32m+[m[32m                        <div class="overview-stats">[m
+[32m+[m[32m                            <div class="overview-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="enhanced-total-performances">0</div>[m
+[32m+[m[32m                                <div class="stat-label">Total Performances</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="overview-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="enhanced-live-performances">0</div>[m
+[32m+[m[32m                                <div class="stat-label">Live Performances</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="overview-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="enhanced-pro-shot-performances">0</div>[m
+[32m+[m[32m                                <div class="stat-label">Pro Shots</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="overview-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="enhanced-upcoming-performances">0</div>[m
+[32m+[m[32m                                <div class="stat-label">Upcoming</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m
+[32m+[m[32m                    <!-- Key Insights -->[m
+[32m+[m[32m                    <section class="insights-section" aria-labelledby="enhanced-insights-heading">[m
+[32m+[m[32m                        <h3 id="enhanced-insights-heading">💡 Key Insights</h3>[m
+[32m+[m[32m                        <div id="enhanced-insights-container" class="insights-grid">[m
+[32m+[m[32m                            <!-- Insights will be populated here -->[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </section>[m
+[32m+[m
+[32m+[m[32m                    <!-- Achievements -->[m
+[32m+[m[32m                    <section class="achievements-section" aria-labelledby="enhanced-achievements-heading">[m
+[32m+[m[32m                        <h3 id="enhanced-achievements-heading">🏆 Achievements</h3>[m
+[32m+[m[32m                        <div id="enhanced-achievements-container" class="achievements-grid">[m
+[32m+[m[32m                            <!-- Achievements will be populated here -->[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </section>[m
+[32m+[m[32m                </div>[m
+[32m+[m
+[32m+[m[32m                <!-- Live Performances View -->[m
+[32m+[m[32m                <div id="analytics-live" class="analytics-view hidden">[m
+[32m+[m[32m                    <div class="live-card">[m
+[32m+[m[32m                        <h3>🎭 Live Performances</h3>[m
+[32m+[m[32m                        <div class="live-stats">[m
+[32m+[m[32m                            <div class="live-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="live-total-count">0</div>[m
+[32m+[m[32m                                <div class="stat-label">Total Live Shows</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="live-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="live-average-rating">0.0</div>[m
+[32m+[m[32m                                <div class="stat-label">Average Rating</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="live-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="live-average-cost">£0.00</div>[m
+[32m+[m[32m                                <div class="stat-label">Average Cost</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="live-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="live-total-spent">£0.00</div>[m
+[32m+[m[32m                                <div class="stat-label">Total Spent</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m
+[32m+[m[32m                    <!-- Rating Distribution -->[m
+[32m+[m[32m                    <div class="rating-distribution">[m
+[32m+[m[32m                        <h3>📊 Live Performance Rating Distribution</h3>[m
+[32m+[m[32m                        <div id="enhanced-live-rating-distribution" class="rating-bars">[m
+[32m+[m[32m                            <!-- Rating distribution will be populated here -->[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m
+[32m+[m[32m                    <!-- Price Range Analysis -->[m
+[32m+[m[32m                    <div class="price-analysis">[m
+[32m+[m[32m                        <h3>💷 Live Performance Price Range Analysis</h3>[m
+[32m+[m[32m                        <div id="enhanced-live-price-ranges" class="price-ranges-grid">[m
+[32m+[m[32m                            <!-- Price ranges will be populated here -->[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m[32m                </div>[m
+[32m+[m
+[32m+[m[32m                <!-- Pro Shot View -->[m
+[32m+[m[32m                <div id="analytics-proshot" class="analytics-view hidden">[m
+[32m+[m[32m                    <div class="proshot-card">[m
+[32m+[m[32m                        <h3>📺 Pro Shots</h3>[m
+[32m+[m[32m                        <div class="proshot-stats">[m
+[32m+[m[32m                            <div class="proshot-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="proshot-total-count">0</div>[m
+[32m+[m[32m                                <div class="stat-label">Total Pro Shots</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="proshot-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="proshot-average-rating">0.0</div>[m
+[32m+[m[32m                                <div class="stat-label">Average Rating</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="proshot-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="proshot-best-rating">0.0</div>[m
+[32m+[m[32m                                <div class="stat-label">Best Rating</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="proshot-stat">[m
+[32m+[m[32m                                <div class="stat-value" id="proshot-recent-count">0</div>[m
+[32m+[m[32m                                <div class="stat-label">This Year</div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m
+[32m+[m[32m                    <!-- Pro Shot Rating Distribution -->[m
+[32m+[m[32m                    <div class="rating-distribution">[m
+[32m+[m[32m                        <h3>📊 Pro Shot Rating Distribution</h3>[m
+[32m+[m[32m                        <div id="enhanced-proshot-rating-distribution" class="rating-bars">[m
+[32m+[m[32m                            <!-- Rating distribution will be populated here -->[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m[32m                </div>[m
+[32m+[m
+[32m+[m[32m                <!-- Comparison View -->[m
+[32m+[m[32m                <div id="analytics-comparison" class="analytics-view hidden">[m
+[32m+[m[32m                    <div class="comparison-grid">[m
+[32m+[m[32m                        <div class="comparison-card">[m
+[32m+[m[32m                            <h4>Live vs Pro Shot Comparison</h4>[m
+[32m+[m[32m                            <div class="comparison-stats">[m
+[32m+[m[32m                                <div class="comparison-stat">[m
+[32m+[m[32m                                    <div class="stat-number" id="comparison-live-count">0</div>[m
+[32m+[m[32m                                    <div class="stat-label">Live Performances</div>[m
+[32m+[m[32m                                </div>[m
+[32m+[m[32m                                <div class="comparison-stat">[m
+[32m+[m[32m                                    <div class="stat-number" id="comparison-proshot-count">0</div>[m
+[32m+[m[32m                                    <div class="stat-label">Pro Shots</div>[m
+[32m+[m[32m                                </div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                        <div class="comparison-card">[m
+[32m+[m[32m                            <h4>Average Ratings</h4>[m
+[32m+[m[32m                            <div class="comparison-stats">[m
+[32m+[m[32m                                <div class="comparison-stat">[m
+[32m+[m[32m                                    <div class="stat-number" id="comparison-live-rating">0.0</div>[m
+[32m+[m[32m                                    <div class="stat-label">Live Average</div>[m
+[32m+[m[32m                                </div>[m
+[32m+[m[32m                                <div class="comparison-stat">[m
+[32m+[m[32m                                    <div class="stat-number" id="comparison-proshot-rating">0.0</div>[m
+[32m+[m[32m                                    <div class="stat-label">Pro Shot Average</div>[m
+[32m+[m[32m                                </div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m
+[32m+[m[32m                    <!-- Year-over-Year Comparison -->[m
+[32m+[m[32m                    <div class="comparison-section">[m
+[32m+[m[32m                        <h3>📅 Year-over-Year Comparison</h3>[m
+[32m+[m[32m                        <div class="comparison-grid">[m
+[32m+[m[32m                            <div class="comparison-card">[m
+[32m+[m[32m                                <h4>This Year</h4>[m
+[32m+[m[32m                                <div class="comparison-stats">[m
+[32m+[m[32m                                    <div class="comparison-stat">[m
+[32m+[m[32m                                        <div class="stat-number" id="enhanced-this-year-shows">0</div>[m
+[32m+[m[32m                                        <div class="stat-label">Performances</div>[m
+[32m+[m[32m                                    </div>[m
+[32m+[m[32m                                    <div class="comparison-stat">[m
+[32m+[m[32m                                        <div class="stat-number" id="enhanced-this-year-spent">£0.00</div>[m
+[32m+[m[32m                                        <div class="stat-label">Spent</div>[m
+[32m+[m[32m                                    </div>[m
+[32m+[m[32m                                    <div class="comparison-stat">[m
+[32m+[m[32m                                        <div class="stat-number" id="enhanced-this-year-rating">0.0</div>[m
+[32m+[m[32m                                        <div class="stat-label">Avg Rating</div>[m
+[32m+[m[32m                                    </div>[m
+[32m+[m[32m                                </div>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div class="comparison-card">[m
+[32m+[m[32m                                <h4>Last Year</h4>[m
+[32m+[m[32m                                <div class="comparison-stats">[m
+[32m+[m[32m                                    <div class="comparison-stat">[m
+[32m+[m[32m                                        <div class="stat-number" id="enhanced-last-year-shows">0</div>[m
+[32m+[m[32m                                        <div class="stat-label">Performances</div>[m
+[32m+[m[32m                                    </div>[m
+[32m+[m[32m                                    <div class="comparison-stat">[m
+[32m+[m[32m                                        <div class="stat-number" id="enhanced-last-year-spent">£0.00</div>[m
+[32m+[m[32m                         
