@@ -43,30 +43,32 @@ class ShowAPI {
 
     // Search external APIs
     async searchExternalAPIs(query) {
-        console.log('Starting external API search with musical database priority...');
+        console.log('Starting external API search with Wikidata priority...');
         
-        // PRIORITY 1: Use musical database first (most accurate)
-        if (window.MusicalDatabase) {
-            console.log('Using musical database as primary source');
-            const musicalResults = window.MusicalDatabase.searchMusicals(query);
-            console.log('Musical database found:', musicalResults.length, 'results');
-            
-            // If we have good musical results, use them and skip external APIs
-            if (musicalResults.length > 0) {
-                return musicalResults.slice(0, 8);
-            }
-        }
-        
-        // PRIORITY 2: Only try Wikidata if no musical database results
-        console.log('No musical database results, trying Wikidata...');
         const results = [];
         
+        // PRIORITY 1: Search Wikidata first (most comprehensive)
         try {
-            // Search Wikidata for musicals only (more restrictive)
+            console.log('Searching Wikidata for comprehensive theatre shows...');
             const wikiResults = await this.searchWikipedia(query);
             results.push(...wikiResults);
+            console.log('Wikidata found:', wikiResults.length, 'results');
         } catch (error) {
             console.warn('Wikidata search failed:', error);
+        }
+        
+        // PRIORITY 2: Fallback to local musical database if needed
+        if (results.length < 3 && window.MusicalDatabase) {
+            console.log('Adding local musical database results as fallback...');
+            const musicalResults = window.MusicalDatabase.searchMusicals(query);
+            console.log('Musical database found:', musicalResults.length, 'additional results');
+            
+            // Add unique results from local database
+            musicalResults.forEach(musical => {
+                if (!results.find(r => r.title.toLowerCase() === musical.title.toLowerCase())) {
+                    results.push(musical);
+                }
+            });
         }
 
         return results;
@@ -113,13 +115,21 @@ class ShowAPI {
                 return [];
             }
             
-            // SPARQL query to find ONLY stage musicals (no TV, films, or sketches)
+            // SPARQL query to find theatre shows (musicals, plays, operas, etc.)
             // SECURITY: User input is sanitized above to prevent SPARQL injection
             const sparqlQuery = `
                 SELECT DISTINCT ?item ?itemLabel ?itemDescription ?composer ?composerLabel ?lyricist ?lyricistLabel 
-                       ?premiereDate ?image ?basedOn ?basedOnLabel ?genre ?genreLabel WHERE {
-                    # Only musical theatre works
-                    ?item wdt:P31/wdt:P279* wd:Q2743 .  # Instance of musical
+                       ?author ?authorLabel ?premiereDate ?image ?basedOn ?basedOnLabel ?genre ?genreLabel WHERE {
+                    # Theatre shows: musicals, plays, operas, operettas
+                    {
+                        ?item wdt:P31/wdt:P279* wd:Q2743 .  # Instance of musical
+                    } UNION {
+                        ?item wdt:P31/wdt:P279* wd:Q25379 . # Instance of play
+                    } UNION {
+                        ?item wdt:P31/wdt:P279* wd:Q1344 .  # Instance of opera
+                    } UNION {
+                        ?item wdt:P31/wdt:P279* wd:Q181771 . # Instance of operetta
+                    }
                     
                     # Must have a theatre premiere (not TV/film)
                     ?item wdt:P1191 ?premiereDate .     # Must have premiere date
@@ -135,17 +145,19 @@ class ShowAPI {
                     FILTER(LANG(?itemLabel) = "en")
                     FILTER(CONTAINS(LCASE(?itemLabel), "${sanitizedQuery}"))
                     
-                    # Must have composer (key requirement for musicals)
-                    ?item wdt:P86 ?composer .           # Must have composer
-                    
-                    OPTIONAL { ?item wdt:P676 ?lyricist . }     # Lyricist
-                    OPTIONAL { ?item wdt:P18 ?image . }         # Image
-                    OPTIONAL { ?item wdt:P144 ?basedOn . }      # Based on
-                    OPTIONAL { ?item wdt:P136 ?genre . }        # Genre
+                    # Optional properties for different show types
+                    OPTIONAL { ?item wdt:P86 ?composer . }        # Composer (for musicals/operas)
+                    OPTIONAL { ?item wdt:P676 ?lyricist . }       # Lyricist (for musicals)
+                    OPTIONAL { ?item wdt:P50 ?author . }          # Author (for plays)
+                    OPTIONAL { ?item wdt:P18 ?image . }           # Image
+                    OPTIONAL { ?item wdt:P144 ?basedOn . }        # Based on
+                    OPTIONAL { ?item wdt:P136 ?genre . }          # Genre
+                    OPTIONAL { ?item schema:description ?itemDescription . FILTER(LANG(?itemDescription) = "en") }
                     
                     SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
                 }
-                LIMIT 5
+                ORDER BY DESC(?premiereDate)
+                LIMIT 20
             `;
 
             const wikidataSparql = 'https://query.wikidata.org/sparql';
@@ -203,8 +215,9 @@ class ShowAPI {
                     id: id,
                     title: binding.itemLabel?.value || 'Unknown Title',
                     synopsis: binding.itemDescription?.value || 'No description available',
-                    composer: binding.composerLabel?.value || 'Unknown',
+                    composer: binding.composerLabel?.value || binding.authorLabel?.value || 'Unknown',
                     lyricist: binding.lyricistLabel?.value || 'Unknown',
+                    author: binding.authorLabel?.value || binding.composerLabel?.value || 'Unknown',
                     premiere_date: binding.premiereDate?.value?.split('T')[0] || null,
                     poster_image_url: this.getWikimediaImageUrl(binding.image?.value) || '',
                     based_on: binding.basedOnLabel?.value || null,
@@ -214,13 +227,16 @@ class ShowAPI {
                     external_url: `https://www.wikidata.org/wiki/${wikidataId}`
                 });
             } else {
-                // Merge additional information (multiple composers, genres, etc.)
+                // Merge additional information (multiple composers, authors, genres, etc.)
                 const existing = showMap.get(id);
                 if (binding.composerLabel?.value && !existing.composer.includes(binding.composerLabel.value)) {
                     existing.composer += `, ${binding.composerLabel.value}`;
                 }
                 if (binding.lyricistLabel?.value && !existing.lyricist.includes(binding.lyricistLabel.value)) {
                     existing.lyricist += `, ${binding.lyricistLabel.value}`;
+                }
+                if (binding.authorLabel?.value && !existing.author.includes(binding.authorLabel.value)) {
+                    existing.author += `, ${binding.authorLabel.value}`;
                 }
                 if (binding.genreLabel?.value && (!existing.genre || !existing.genre.includes(binding.genreLabel.value))) {
                     existing.genre = existing.genre ? `${existing.genre}, ${binding.genreLabel.value}` : binding.genreLabel.value;
