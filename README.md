@@ -371,11 +371,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Font Awesome** for the pretty icons
 - **Wikidata** for show information (when it's not wrong)
 - **The theatre community** for being awesome and inspiring this mess
-- **AI Assistants** (Claude & ChatGPT) for helping us build this thing - see [AI Declaration](AI-DECLARATION.md) for the full story
+- **AI Assistants** (Claude & ChatGPT) for helping us build this thing - see [AI Declaration](docs/AI-DECLARATION.md) for the full story
 
 ## 🤖 AI Transparency
 
-This project was built with AI assistance because we're not coding gods. For full transparency about AI usage, check out our [AI Declaration](AI-DECLARATION.md).
+This project was built with AI assistance because we're not coding gods. For full transparency about AI usage, check out our [AI Declaration](docs/AI-DECLARATION.md).
 
 ---
 
