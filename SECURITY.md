@@ -6,6 +6,7 @@ We actively maintain security for the following versions of StageLog:
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 2.8.x   | ✅ Yes             |
 | 2.7.x   | ✅ Yes             |
 | 2.6.x   | ✅ Yes             |
 | 2.5.x   | ⚠️ Limited Support |
@@ -41,6 +42,8 @@ We actively maintain security for the following versions of StageLog:
 - 📊 **Data validation issues**
 - 🔄 **Session management flaws**
 - 🗄️ **Database security issues**
+- 🔑 **API key exposure or misuse**
+- 🌍 **External API security (Google Maps, Wikidata, etc.)**
 
 ### **Out of Scope:**
 
@@ -74,6 +77,10 @@ We appreciate security researchers who help keep StageLog secure! Contributors w
 - 📚 Stay informed about web security best practices
 - 🔒 Use HTTPS for all external communications
 - 🛡️ Validate all user inputs
+- 🔑 **Never commit API keys** - Always use placeholders (`REPLACE_WITH_YOUR_*_API_KEY`)
+- 🚫 **Configure API key restrictions** in Google Cloud Console (HTTP referrers, IP restrictions)
+- 📝 **Use `.gitignore` patterns** to exclude sensitive files (`*api-key*`, `*secret*`, `*password*`)
+- 🔐 **Review API key usage** regularly and rotate keys if compromised
 
 ## 🔗 Additional Resources
 
@@ -81,8 +88,43 @@ We appreciate security researchers who help keep StageLog secure! Contributors w
 - [GitHub Security Advisories](https://docs.github.com/en/code-security/security-advisories)
 - [StageLog Documentation](https://github.com/spike1478/stagelog#readme)
 
+## 🔐 API Key Security (v2.8.0+)
+
+StageLog v2.8.0 introduced Google Maps Places API integration. To ensure security:
+
+### **API Key Management:**
+- ✅ All API keys use secure placeholders in the codebase (`REPLACE_WITH_YOUR_*_API_KEY`)
+- ✅ `.gitignore` patterns prevent accidental commits of sensitive files
+- ✅ API keys are never stored in version control
+
+### **Required API Keys:**
+- **Google Maps API Key**: Required for location autocomplete features
+  - Enable: "Places API (New)" and "Maps JavaScript API"
+  - Set HTTP referrer restrictions in Google Cloud Console
+  - Never commit the actual key to the repository
+
+- **Firebase API Key** (optional): For device synchronization
+  - Configure in Firebase Console
+  - Set appropriate security rules
+  - Use environment variables for production
+
+### **Security Best Practices:**
+1. **Get API keys** from official providers (Google Cloud Console, Firebase Console)
+2. **Set API restrictions** (HTTP referrers, IP addresses) to limit usage
+3. **Use placeholders** in code (`REPLACE_WITH_YOUR_MAPS_API_KEY`)
+4. **Add keys locally** only - never commit them
+5. **Rotate keys** if accidentally exposed
+6. **Monitor usage** in provider dashboards for suspicious activity
+
+### **If You Accidentally Commit an API Key:**
+1. **Immediately revoke** the exposed key in the provider console
+2. **Generate a new key** with the same restrictions
+3. **Remove the key** from git history (if needed, use `git filter-branch` or BFG Repo-Cleaner)
+4. **Update `.gitignore`** to prevent future commits
+5. **Review access logs** for any unauthorized usage
+
 ---
 
-**Last Updated:** October 1, 2025  
+**Last Updated:** November 8, 2025  
 **Contact:** [security@mayamccutcheon.com]  
 **Repository:** https://github.com/spike1478/stagelog
