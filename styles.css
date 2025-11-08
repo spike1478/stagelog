@@ -3781,6 +3781,44 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     font-weight: 600;
 }
 
+/* Google Places autocomplete dropdown should appear above UI */
+.pac-container {
+    z-index: 10050 !important;
+}
+
+/* Time slot and warning badges for performance date */
+.time-slot-badge {
+    display: inline-block;
+    margin-left: 0.25rem;
+    padding: 0.1rem 0.35rem;
+    font-size: 0.7rem;
+    border-radius: 10px;
+    background: #eef6ff;
+    color: #1b5fcc;
+}
+
+.warning-badge {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.7rem;
+    border-radius: 10px;
+    background: #fff4e5;
+    color: #a35b00;
+    border: 1px solid #ffd7a6;
+}
+
+[data-theme="dark"] .time-slot-badge {
+    background: #223758;
+    color: #a8c8ff;
+}
+
+[data-theme="dark"] .warning-badge {
+    background: #4a351c;
+    color: #ffd59c;
+    border-color: #6a4a1e;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .analytics-page .page-header {
@@ -3837,5 +3875,62 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     
     .analytics-controls .btn {
         width: 100%;
+    }
+}
+
+/* Google Calendar Button Styles */
+.calendar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.calendar-btn:hover {
+    background: #3367d6;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+}
+
+.calendar-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(66, 133, 244, 0.3);
+}
+
+.calendar-btn i {
+    font-size: 0.75rem;
+}
+
+/* Dark mode calendar button */
+[data-theme="dark"] .calendar-btn {
+    background: #5a95f5;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .calendar-btn:hover {
+    background: #4a85e5;
+    box-shadow: 0 2px 8px rgba(90, 149, 245, 0.4);
+}
+
+/* Responsive calendar button */
+@media (max-width: 768px) {
+    .calendar-btn {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+        margin-left: 0.25rem;
+    }
+    
+    .calendar-btn i {
+        font-size: 0.7rem;
     }
 }

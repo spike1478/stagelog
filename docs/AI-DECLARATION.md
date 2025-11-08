@@ -30,6 +30,11 @@ This project was developed with the assistance of artificial intelligence tools.
 - **Device Sync System**: AI assistance implementing Firebase real-time synchronization
 - **Musical/Non-Musical Rating System**: AI help developing adaptive rating algorithms
 - **Settings Management**: AI assistance creating dedicated settings page and controls
+- **Google Maps Integration**: AI assistance implementing Google Maps Places API autocomplete
+- **Google Calendar Integration**: AI help implementing individual and bulk calendar export functionality
+- **Enhanced Show Search**: AI assistance integrating Wikidata and Ovrtur.com APIs
+- **Location Backfill Tools**: AI help creating admin tools for location data enrichment
+- **Time Field Management**: AI assistance implementing required time field with validation
 
 ### Documentation
 - **README.md**: AI assistance with comprehensive documentation
@@ -89,6 +94,6 @@ For questions about AI usage in this project, please open an issue or contact th
 
 ---
 
-**Last Updated**: October 1, 2025  
-**Version**: 2.7.0  
-**AI Declaration Version**: 1.3
+**Last Updated**: November 8, 2025  
+**Version**: 2.8.0  
+**AI Declaration Version**: 1.4

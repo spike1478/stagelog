@@ -236,14 +236,6 @@ class StageLogApp {
             const performances = JSON.parse(localStorage.getItem('stagelog_performances') || '[]');
             const shows = JSON.parse(localStorage.getItem('stagelog_shows') || '[]');
             
-            console.log('🔍 Debug: localStorage data check:');
-            console.log('  - Performances in localStorage:', performances.length);
-            console.log('  - Shows in localStorage:', shows.length);
-            
-            if (performances.length > 0) {
-                console.log('  - First performance:', performances[0]);
-            }
-            
             if (performances.length === 0) {
                 console.warn('⚠️ No performance data found in localStorage!');
                 console.log('💡 Try using Import JSON to restore your data');
@@ -281,8 +273,6 @@ class StageLogApp {
     // Update basic performance statistics
     updateBasicStats(performances) {
         try {
-            console.log('🔍 Updating basic stats with', performances.length, 'performances');
-            
             // Total performances
             const totalElement = document.getElementById('total-performances');
             if (totalElement) {
@@ -842,11 +832,8 @@ class StageLogApp {
 
     // Generate HTML for a performance card
     generatePerformanceCard(performance) {
-        console.log('🔍 DEBUG: generatePerformanceCard called for performance:', performance.id);
-        
         const show = window.db.getShowById(performance.show_id);
         const showTitle = show ? show.title : 'Unknown Show';
-        console.log('🔍 DEBUG: Show found:', showTitle);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const performanceDate = new Date(performance.date_seen);
@@ -895,6 +882,10 @@ class StageLogApp {
             costDisplay = '<span class="no-cost">No cost data</span>';
         }
         
+        // Check if we have enough data for a calendar event
+        const hasCalendarData = this.hasCalendarData(performance);
+        const calendarButton = hasCalendarData ? this.generateCalendarButton(performance, show) : '';
+
         return `
             <div class="performance-card" data-performance-id="${performance.id}">
                 <div class="performance-header">
@@ -902,7 +893,7 @@ class StageLogApp {
                     ${ratingDisplay}
                 </div>
                 <div class="performance-details">
-                    <span class="performance-date">${formattedDate}</span>
+                    <span class="performance-date">${formattedDate}${performance.time_seen ? `, ${performance.time_seen}` : ''}${performance.time_slot ? ` <span class=\"time-slot-badge\">${performance.time_slot}</span>` : ''}${!performance.time_seen ? ` <span class=\"warning-badge\">Time required</span>` : ''}${calendarButton}</span>
                     <span class="performance-theatre">${performance.theatre_name}</span>
                     <span class="performance-city">${performance.city}</span>
                     <span class="performance-seat">${performance.seat_location || 'N/A'}</span>
@@ -963,6 +954,10 @@ class StageLogApp {
                </div>`
             : '<div class="rating-display"><span class="rating-value">Not rated</span></div>';
 
+        // Check if we have enough data for a calendar event
+        const hasCalendarData = this.hasCalendarData(performance);
+        const calendarButton = hasCalendarData ? this.generateCalendarButton(performance, show) : '';
+
         return `
             <div class="performance-card">
                 <div class="performance-header">
@@ -972,7 +967,8 @@ class StageLogApp {
                 <div class="performance-details">
                     <div class="detail-item">
                         <i class="fas fa-calendar" aria-hidden="true"></i>
-                        <span>${formattedDate}</span>
+                        <span>${formattedDate}${performance.time_seen ? `, ${performance.time_seen}` : ''}${performance.time_slot ? ` <span class=\"time-slot-badge\">${performance.time_slot}</span>` : ''}${!performance.time_seen ? ` <span class=\"warning-badge\">Time required</span>` : ''}</span>
+                        ${calendarButton}
                     </div>
                     <div class="detail-item">
                         <i class="fas fa-building" aria-hidden="true"></i>
@@ -1006,6 +1002,105 @@ class StageLogApp {
                 </div>
             </div>
         `;
+    }
+
+    // Check if performance has enough data for calendar event
+    hasCalendarData(performance) {
+        // Need date, time, theatre name, and city for a meaningful calendar event
+        return performance.date_seen && 
+               performance.time_seen &&
+               performance.theatre_name && 
+               performance.city &&
+               performance.date_seen.trim() !== '' &&
+               performance.time_seen.trim() !== '' &&
+               performance.theatre_name.trim() !== '' &&
+               performance.city.trim() !== '';
+    }
+
+    // Generate Google Calendar button HTML
+    generateCalendarButton(performance, show) {
+        const calendarUrl = this.generateGoogleCalendarUrl(performance, show);
+        return `
+            <button type="button" 
+                    class="calendar-btn" 
+                    onclick="window.app.openCalendar('${encodeURIComponent(calendarUrl)}')"
+                    title="Add to Google Calendar"
+                    style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; background: #4285f4; color: white; border: none; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+                <i class="fas fa-calendar-plus" aria-hidden="true"></i> Add to Calendar
+            </button>
+        `;
+    }
+
+    // Generate Google Calendar URL
+    generateGoogleCalendarUrl(performance, show) {
+        // Parse the date
+        const eventDate = new Date(performance.date_seen);
+        if (isNaN(eventDate.getTime())) {
+            console.error('Invalid date for calendar event:', performance.date_seen);
+            return '';
+        }
+
+        // Set start time from performance time if available, else default 19:30
+        const startTime = new Date(eventDate);
+        if (performance.time_seen && /^(\d{2}):(\d{2})$/.test(performance.time_seen)) {
+            const match = performance.time_seen.match(/^(\d{2}):(\d{2})$/);
+            const hh = parseInt(match[1], 10);
+            const mm = parseInt(match[2], 10);
+            startTime.setHours(hh, mm, 0, 0);
+        } else {
+            startTime.setHours(19, 30, 0, 0);
+        }
+
+        // End time = start time + 3 hours
+        const endTime = new Date(startTime);
+        endTime.setHours(startTime.getHours() + 3, startTime.getMinutes(), 0, 0);
+
+        // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ)
+        const formatDateForGoogle = (date) => {
+            return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        };
+
+        // Create event details
+        const title = encodeURIComponent(show ? show.title : 'Theatre Performance');
+        const locationString = performance.location_address && performance.location_address.trim().length > 0
+            ? performance.location_address
+            : `${performance.theatre_name}, ${performance.city}`;
+        const location = encodeURIComponent(locationString);
+        const description = encodeURIComponent(
+            `Theatre Performance: ${show ? show.title : 'Performance'}\n\n` +
+            `Theatre: ${performance.theatre_name}\n` +
+            `City: ${performance.city}\n` +
+            `Type: ${performance.production_type || 'Live Performance'}\n\n` +
+            `Added from StageLog`
+        );
+        const startDate = formatDateForGoogle(startTime);
+        const endDate = formatDateForGoogle(endTime);
+
+        // Build Google Calendar URL
+        const baseUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+        const params = [
+            `text=${title}`,
+            `dates=${startDate}/${endDate}`,
+            `location=${location}`,
+            `details=${description}`,
+            'trp=false',
+            'sprop=name:StageLog',
+            'sprop=website:stagelog.app'
+        ];
+
+        return `${baseUrl}&${params.join('&')}`;
+    }
+
+    // Open calendar URL
+    openCalendar(encodedUrl) {
+        try {
+            const url = decodeURIComponent(encodedUrl);
+            console.log('Opening Google Calendar:', url);
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } catch (error) {
+            console.error('Error opening calendar:', error);
+            this.showMessage('Error opening calendar. Please try again.', 'error');
+        }
     }
 
     generateCostDisplay(performance) {
@@ -1253,8 +1348,6 @@ class StageLogApp {
     }
 
     updateBestOverallShow(completedPerformances) {
-        console.log('🔍 updateBestOverallShow called with:', completedPerformances?.length, 'performances');
-        
         if (!completedPerformances || completedPerformances.length === 0) {
             console.log('❌ No completed performances found');
             this.updateBestShowDisplay('-', '-', '-');
@@ -1312,8 +1405,6 @@ class StageLogApp {
     }
 
     updateWorstRatedPerformance(completedPerformances) {
-        console.log('🔍 updateWorstRatedPerformance called with:', completedPerformances?.length, 'performances');
-        
         if (!completedPerformances || completedPerformances.length === 0) {
             console.log('❌ No completed performances found');
             this.updateWorstShowDisplay('-', '-', '-');
@@ -1322,7 +1413,6 @@ class StageLogApp {
 
         // Get shows data to look up show names
         const shows = window.db.getShows();
-        console.log('🎭 Available shows for worst performance:', shows.length);
 
         // Find the performance with the lowest weighted rating
         let worstPerformance = null;
@@ -1745,6 +1835,7 @@ class StageLogApp {
             
             // Populate basic fields
             const dateField = document.getElementById('date-seen');
+            const timeField = document.getElementById('time-seen');
             const theatreField = document.getElementById('theatre-name');
             const cityField = document.getElementById('city');
             const productionTypeField = document.getElementById('production-type');
@@ -1756,7 +1847,17 @@ class StageLogApp {
                 // Trigger date change to handle future vs past performance logic
                 this.handleDateChange();
             }
-            if (theatreField) theatreField.value = performance.theatre_name;
+            if (timeField) {
+                timeField.value = performance.time_seen || '';
+            }
+            if (theatreField) {
+                theatreField.value = performance.theatre_name;
+                // Seed dataset from saved location so calendar/autofill can work during edit
+                if (performance.location_place_id) theatreField.dataset.placeId = performance.location_place_id;
+                if (performance.location_address) theatreField.dataset.formattedAddress = performance.location_address;
+                if (performance.location_lat != null) theatreField.dataset.lat = String(performance.location_lat);
+                if (performance.location_lng != null) theatreField.dataset.lng = String(performance.location_lng);
+            }
             if (cityField) cityField.value = performance.city;
             if (productionTypeField) {
                 productionTypeField.value = performance.production_type;
@@ -2230,6 +2331,7 @@ class StageLogApp {
 
         // Collect form data
         const dateField = document.getElementById('date-seen');
+        const timeField = document.getElementById('time-seen');
         const theatreField = document.getElementById('theatre-name');
         const cityField = document.getElementById('city');
         const productionTypeField = document.getElementById('production-type');
@@ -2244,7 +2346,7 @@ class StageLogApp {
         const travelCostField = document.getElementById('travel-cost');
         const otherExpensesField = document.getElementById('other-expenses');
         
-        if (!dateField?.value || !theatreField?.value || !cityField?.value || !productionTypeField?.value) {
+        if (!dateField?.value || !timeField?.value || !theatreField?.value || !cityField?.value || !productionTypeField?.value) {
             this.showMessage('Please fill in all required fields.', 'error');
             return;
         }
@@ -2326,11 +2428,36 @@ class StageLogApp {
         const isMusicalField = document.getElementById('is-musical');
         const isMusical = isMusicalField ? isMusicalField.checked : true;
 
+        // Derive time slot from time (optional). Default: classify by typical rule if provided
+        let timeSeen = timeField?.value || '';
+        let timeSlot = '';
+        if (timeSeen) {
+            try {
+                const [hh, mm] = timeSeen.split(':').map(v => parseInt(v, 10));
+                if (!isNaN(hh)) {
+                    // Matinee if start time before 17:00, else Evening
+                    timeSlot = hh < 17 ? 'Matinee' : 'Evening';
+                }
+            } catch (_) {}
+        }
+
+        // Read enriched Google Places data if available (stored on inputs dataset)
+        const placeId = theatreField?.dataset.placeId || '';
+        const placeAddress = theatreField?.dataset.formattedAddress || '';
+        const placeLat = theatreField?.dataset.lat ? parseFloat(theatreField.dataset.lat) : null;
+        const placeLng = theatreField?.dataset.lng ? parseFloat(theatreField.dataset.lng) : null;
+
         const performanceData = {
             show_id: this.currentShow.id,
             date_seen: dateField.value,
+            time_seen: timeSeen,
+            time_slot: timeSlot,
             theatre_name: theatreField.value,
             city: cityField.value,
+            location_place_id: placeId,
+            location_address: placeAddress,
+            location_lat: placeLat,
+            location_lng: placeLng,
             production_type: productionTypeField.value,
             is_musical: isMusical,
             notes_on_access: notesAccessField?.value || '',
@@ -2429,6 +2556,36 @@ class StageLogApp {
         return result;
     }
 
+    // Validate show data before displaying
+    isValidShowData(show) {
+        if (!show || typeof show !== 'object') return false;
+        
+        // Check for required fields
+        if (!show.title || typeof show.title !== 'string') return false;
+        
+        // Check for error indicators in the data
+        const errorIndicators = [
+            'Class "', 'not found',
+            'Fatal error', 'Warning',
+            'Exception', 'Stack trace',
+            'Error 404', 'Error 500',
+            'Internal Server Error'
+        ];
+        
+        const showString = JSON.stringify(show);
+        for (const indicator of errorIndicators) {
+            if (showString.includes(indicator)) {
+                console.log('❌ Error indicator found in show data:', indicator);
+                return false;
+            }
+        }
+        
+        // Title should be reasonable length and not contain obvious errors
+        if (show.title.length < 1 || show.title.length > 200) return false;
+        
+        return true;
+    }
+
     displaySearchResults(shows, source) {
         const resultsContainer = document.getElementById('show-suggestions');
         if (!resultsContainer) {
@@ -2454,7 +2611,29 @@ class StageLogApp {
                 </div>
             `;
         } else {
-            resultsContainer.innerHTML = shows.map(show => {
+            // Filter out invalid shows first
+            const validShows = shows.filter(show => {
+                if (!this.isValidShowData(show)) {
+                    console.log('❌ Invalid show data, filtering out:', show);
+                    return false;
+                }
+                return true;
+            });
+            
+            if (validShows.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="search-result" style="padding: 1rem; text-align: center; border: 1px dashed #ccc; background: #f9f9f9;">
+                        <p style="margin: 0 0 0.5rem 0;">No valid shows found for "${searchValue}"</p>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="window.app.createCustomShow()">
+                            <i class="fas fa-plus"></i> Create "${searchValue}"
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultsContainer.innerHTML = validShows.map(show => {
+                
                 const sourceIcon = this.getSourceIcon(show.source);
                 const genreIcon = this.getGenreIcon(show.genre);
                 const additionalInfo = this.getAdditionalShowInfo(show);
@@ -2840,61 +3019,46 @@ function loadMyShows() {
 
 // Load city filter for My Shows page
 function loadMyShowsCityFilter() {
-    console.log('🔍 DEBUG: loadMyShowsCityFilter called');
     const cityFilter = document.getElementById('my-shows-city-filter');
-    console.log('🔍 DEBUG: City filter element found:', !!cityFilter);
     if (!cityFilter) return;
     
     const performances = window.db.getPerformances();
-    console.log('🔍 DEBUG: Performances for city filter:', performances.length);
     const cities = [...new Set(performances.map(p => p.city))].sort();
-    console.log('🔍 DEBUG: Unique cities found:', cities);
     
     cityFilter.innerHTML = '<option value="">All Cities</option>' + 
         cities.map(city => `<option value="${city}">${city}</option>`).join('');
-    console.log('🔍 DEBUG: City filter populated');
 }
 
 // Global functions
 function switchPage(pageId) {
-    console.log('🔍 DEBUG: switchPage called with pageId:', pageId);
-    
     // Hide all pages
     const pages = document.querySelectorAll('.page');
-    console.log('🔍 DEBUG: Found', pages.length, 'pages');
     pages.forEach(page => {
         page.classList.remove('active');
     });
     
     // Remove active class from all nav buttons
     const navButtons = document.querySelectorAll('.nav-btn');
-    console.log('🔍 DEBUG: Found', navButtons.length, 'nav buttons');
     navButtons.forEach(btn => {
         btn.classList.remove('active');
     });
     
     // Show selected page
     const targetPage = document.getElementById(pageId);
-    console.log('🔍 DEBUG: Target page found:', !!targetPage);
     if (targetPage) {
         targetPage.classList.add('active');
-        console.log('🔍 DEBUG: Added active class to', pageId);
     }
     
     // Add active class to corresponding nav button
     const targetBtn = document.querySelector(`[data-page="${pageId}"]`);
-    console.log('🔍 DEBUG: Target nav button found:', !!targetBtn);
     if (targetBtn) {
         targetBtn.classList.add('active');
-        console.log('🔍 DEBUG: Added active class to nav button for', pageId);
     }
     
     // Load appropriate data
     if (pageId === 'dashboard') {
-        console.log('🔍 DEBUG: Loading dashboard');
         window.app.loadDashboard();
     } else if (pageId === 'my-shows') {
-        console.log('🔍 DEBUG: Loading My Shows page');
         loadMyShows();
     } else if (pageId === 'access-schemes') {
         window.app.loadAccessSchemes();
@@ -3140,6 +3304,193 @@ function initializeTheme() {
     if (settingsThemeIcon) {
         settingsThemeIcon.className = defaultTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
+}
+
+// Optional: Initialize Google Places Autocomplete if available
+function initializePlacesAutocomplete() {
+    try {
+        const theatreInput = document.getElementById('theatre-name');
+        const cityInput = document.getElementById('city');
+        if (!theatreInput && !cityInput) return;
+
+        // Disable Maps integration for Pro Shot
+        const productionTypeField = document.getElementById('production-type');
+        const currentType = productionTypeField ? productionTypeField.value : '';
+        if (currentType === 'Pro Shot') {
+            console.info('Production type is Pro Shot - skipping Maps integration');
+            return;
+        }
+
+        const maps = window.google && window.google.maps;
+        if (!maps || !maps.places || !maps.places.Autocomplete) {
+            console.info('Google Places not available - skipping autocomplete');
+            return;
+        }
+
+        // Simple fallback: if user typed theatre and we have a formatted address in dataset,
+        // derive a city when city is empty.
+        const deriveCityFromAddress = () => {
+            try {
+                if (!theatreInput || !cityInput) return;
+                if (cityInput.value && cityInput.value.trim() !== '') return;
+                const addr = theatreInput.dataset.formattedAddress || '';
+                if (!addr) return;
+                const parts = addr.split(',').map(p => p.trim()).filter(Boolean);
+                if (parts.length >= 2) {
+                    const guess = parts[parts.length - 2];
+                    if (guess && guess.length >= 2) cityInput.value = guess;
+                }
+            } catch (_) {}
+        };
+
+        // Prefer new PlaceAutocompleteElement when available; otherwise use legacy Autocomplete
+        // Prefer modern web component if available
+        const hasPlaceElement = (typeof customElements !== 'undefined') && !!customElements.get('gmpx-place-autocomplete');
+
+        const extractCity = (components = []) => {
+            const byType = (t) => components.find(c => c.types && c.types.includes(t))?.long_name;
+            return byType('locality') || byType('postal_town') || byType('sublocality') || byType('administrative_area_level_2') || byType('administrative_area_level_1') || '';
+        };
+
+        if (hasPlaceElement) {
+            // Theatre (establishment) autocomplete element bound to the input via 'for'
+            if (theatreInput) {
+                let el = document.getElementById('theatre-autocomplete');
+                if (!el) {
+                    el = document.createElement('gmpx-place-autocomplete');
+                    el.id = 'theatre-autocomplete';
+                    el.setAttribute('for', 'theatre-name');
+                    el.setAttribute('placeholder', theatreInput.placeholder || 'Search theatre');
+                    el.setAttribute('results-type', 'establishment');
+                    theatreInput.parentElement.insertBefore(el, theatreInput.nextSibling);
+                }
+                el.addEventListener('gmpxplacechange', (evt) => {
+                    const place = evt.detail && evt.detail.place;
+                    if (!place) return;
+                    const name = place.displayName || place.name || '';
+                    const formatted = place.formattedAddress || '';
+                    const loc = place.location;
+                    theatreInput.value = name || theatreInput.value;
+                    theatreInput.dataset.placeId = place.id || '';
+                    theatreInput.dataset.formattedAddress = formatted;
+                    if (loc) {
+                        theatreInput.dataset.lat = loc.lat != null ? String(loc.lat) : '';
+                        theatreInput.dataset.lng = loc.lng != null ? String(loc.lng) : '';
+                    }
+                    if (cityInput && place.addressComponents) {
+                        const cityName = extractCity(place.addressComponents);
+                        if (cityName) cityInput.value = cityName; else deriveCityFromAddress();
+                    }
+                }, { once: false });
+            }
+
+            // City (cities) autocomplete element bound via 'for'
+            if (cityInput) {
+                let elCity = document.getElementById('city-autocomplete');
+                if (!elCity) {
+                    elCity = document.createElement('gmpx-place-autocomplete');
+                    elCity.id = 'city-autocomplete';
+                    elCity.setAttribute('for', 'city');
+                    elCity.setAttribute('placeholder', cityInput.placeholder || 'Search city');
+                    elCity.setAttribute('results-type', 'locality');
+                    cityInput.parentElement.insertBefore(elCity, cityInput.nextSibling);
+                }
+                elCity.addEventListener('gmpxplacechange', (evt) => {
+                    const place = evt.detail && evt.detail.place;
+                    if (!place) return;
+                    const components = place.addressComponents || [];
+                    const cityName = place.displayName || place.name || extractCity(components);
+                    if (cityName) cityInput.value = cityName;
+                }, { once: false });
+            }
+        } else {
+            // Legacy Autocomplete fallback
+            if (theatreInput) {
+                const theatreAutocomplete = new maps.places.Autocomplete(theatreInput, {
+                    fields: ['place_id', 'name', 'formatted_address', 'geometry', 'address_components'],
+                    types: ['establishment']
+                });
+                theatreAutocomplete.addListener('place_changed', () => {
+                    const place = theatreAutocomplete.getPlace();
+                    theatreInput.dataset.placeId = place.place_id || '';
+                    theatreInput.dataset.formattedAddress = place.formatted_address || '';
+                    const loc = place.geometry && place.geometry.location;
+                    theatreInput.dataset.lat = loc ? String(loc.lat()) : '';
+                    theatreInput.dataset.lng = loc ? String(loc.lng()) : '';
+                    if (place.name && theatreInput.value !== place.name) {
+                        theatreInput.value = place.name;
+                    }
+                    if (cityInput && place.address_components) {
+                        const cityName = extractCity(place.address_components);
+                        if (cityName) cityInput.value = cityName;
+                        else deriveCityFromAddress();
+                    }
+                });
+                theatreInput.addEventListener('blur', deriveCityFromAddress);
+            }
+            if (cityInput) {
+                const cityAutocomplete = new maps.places.Autocomplete(cityInput, {
+                    fields: ['name', 'address_components'],
+                    types: ['(cities)']
+                });
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to initialize Places Autocomplete:', e);
+    }
+}
+
+// Load Google Maps JS using an inline key (temporary per-user configuration)
+function loadGoogleMapsFromLocalStorage() {
+    try {
+        if (window.google && window.google.maps && window.google.maps.places) {
+            return; // already loaded
+        }
+        const existing = document.getElementById('gmaps-script');
+        if (existing) return;
+        // API key should be set per environment (replace with your key)
+        const key = 'REPLACE_WITH_YOUR_MAPS_API_KEY';
+        if (!key || key === 'REPLACE_WITH_YOUR_MAPS_API_KEY') {
+            console.warn('Google Maps API key not configured');
+            return;
+        }
+        const s = document.createElement('script');
+        s.id = 'gmaps-script';
+        // Use loading=async per Google recommendation to avoid blocking
+        s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&libraries=places&loading=async';
+        s.async = true;
+        s.defer = true;
+        s.onload = () => {
+            console.log('Google Maps JS loaded:', s.src);
+            // After Maps JS, load the Extended Component Library for modern web components
+            loadGoogleMapsComponents().then(() => {
+                try { initializePlacesAutocomplete(); } catch (e) { console.warn('Places init after load failed:', e); }
+            });
+        };
+        s.onerror = (e) => {
+            console.error('Failed to load Google Maps JS:', s.src, e);
+        };
+        document.head.appendChild(s);
+    } catch (e) {
+        console.warn('Failed to load Google Maps from localStorage:', e);
+    }
+}
+
+// Load the Extended Component Library (for gmpx-place-autocomplete)
+function loadGoogleMapsComponents() {
+    return new Promise((resolve) => {
+        if (window.__gmpxComponentsLoaded) return resolve();
+        const existing = document.getElementById('gmpx-components');
+        if (existing) { window.__gmpxComponentsLoaded = true; return resolve(); }
+        const script = document.createElement('script');
+        script.id = 'gmpx-components';
+        script.src = 'https://unpkg.com/@googlemaps/extended-component-library@0.6/dist/index.min.js';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => { window.__gmpxComponentsLoaded = true; resolve(); };
+        script.onerror = () => { console.warn('Extended Component Library failed to load; falling back'); resolve(); };
+        document.head.appendChild(script);
+    });
 }
 
 // Expense Calculation Functions
@@ -3581,16 +3932,26 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('❌ Performance form not found!');
         }
         
-        // Set up show search
+        // Set up show search with throttling
         const showSearch = document.getElementById('show-search');
         if (showSearch) {
+            let searchTimeout;
             showSearch.addEventListener('input', (e) => {
                 console.log('Show search input:', e.target.value);
-                if (e.target.value.length >= 2) {
-                    window.app.searchShows(e.target.value);
-                } else {
-                    window.app.hideSearchResults();
+                
+                // Clear previous timeout
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
                 }
+                
+                // Throttle search requests (wait 500ms after user stops typing)
+                searchTimeout = setTimeout(() => {
+                    if (e.target.value.length >= 3) { // Increased minimum length
+                        window.app.searchShows(e.target.value);
+                    } else {
+                        window.app.hideSearchResults();
+                    }
+                }, 500);
             });
         }
         
@@ -3599,6 +3960,12 @@ document.addEventListener('DOMContentLoaded', () => {
          if (productionType) {
              productionType.addEventListener('change', (e) => {
                  window.app.handleProductionTypeChange(e.target.value);
+                // Toggle Maps autocomplete based on Pro Shot
+                if (e.target.value === 'Pro Shot') {
+                    console.info('Pro Shot selected - Maps autocomplete disabled');
+                } else {
+                    try { initializePlacesAutocomplete(); } catch(_) {}
+                }
              });
          }
          
@@ -3633,6 +4000,10 @@ document.addEventListener('DOMContentLoaded', () => {
          
         // Initialize theme
         initializeTheme();
+        // Try loading Google Maps Places via localStorage key; init after load
+        loadGoogleMapsFromLocalStorage();
+        // Also try to initialize immediately in case Maps is already present
+        initializePlacesAutocomplete();
         
         // Update settings sync status on load
         setTimeout(() => {
@@ -3839,6 +4210,135 @@ function refreshStatsWithFeedback() {
         showFeedback('analytics-refresh-feedback', 'Analytics refreshed! 📊', 'success');
     } catch (error) {
         showFeedback('analytics-refresh-feedback', 'Refresh failed: ' + error.message, 'error');
+    }
+}
+
+// Export all performances to Google Calendar (ICS format)
+function exportAllToCalendar() {
+    try {
+        if (!window.app || !window.db) {
+            throw new Error('Application not initialized');
+        }
+
+        const performances = window.db.getPerformances();
+        const shows = window.db.getShows();
+        
+        // Filter performances with valid calendar data
+        const validPerformances = performances.filter(perf => {
+            return window.app.hasCalendarData(perf);
+        });
+
+        if (validPerformances.length === 0) {
+            showFeedback('calendar-export-feedback', 'No performances with valid date, time, and location data found.', 'error');
+            return;
+        }
+
+        // Generate ICS file content
+        let icsContent = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//StageLog//Theatre Performance Tracker//EN',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'X-WR-CALNAME:StageLog Performances',
+            'X-WR-CALDESC:Theatre performances from StageLog',
+            'X-WR-TIMEZONE:UTC'
+        ].join('\r\n') + '\r\n';
+
+        validPerformances.forEach((performance, index) => {
+            const show = shows.find(s => s.id === performance.show_id);
+            const showTitle = show ? show.title : 'Theatre Performance';
+            
+            // Parse date and time
+            const eventDate = new Date(performance.date_seen);
+            if (isNaN(eventDate.getTime())) {
+                return; // Skip invalid dates
+            }
+
+            const startTime = new Date(eventDate);
+            if (performance.time_seen && /^(\d{2}):(\d{2})$/.test(performance.time_seen)) {
+                const match = performance.time_seen.match(/^(\d{2}):(\d{2})$/);
+                const hh = parseInt(match[1], 10);
+                const mm = parseInt(match[2], 10);
+                startTime.setHours(hh, mm, 0, 0);
+            } else {
+                startTime.setHours(19, 30, 0, 0);
+            }
+
+            const endTime = new Date(startTime);
+            endTime.setHours(startTime.getHours() + 3, startTime.getMinutes(), 0, 0);
+
+            // Format dates for ICS (YYYYMMDDTHHMMSSZ)
+            const formatDateForICS = (date) => {
+                const year = date.getUTCFullYear();
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                const hours = String(date.getUTCHours()).padStart(2, '0');
+                const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+                return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+            };
+
+            const locationString = performance.location_address && performance.location_address.trim().length > 0
+                ? performance.location_address
+                : `${performance.theatre_name}, ${performance.city}`;
+
+            const description = [
+                `Theatre Performance: ${showTitle}`,
+                '',
+                `Theatre: ${performance.theatre_name}`,
+                `City: ${performance.city}`,
+                `Type: ${performance.production_type || 'Live Performance'}`,
+                '',
+                'Added from StageLog'
+            ].join('\\n');
+
+            // Escape special characters for ICS format
+            const escapeICS = (text) => {
+                return text
+                    .replace(/\\/g, '\\\\')
+                    .replace(/;/g, '\\;')
+                    .replace(/,/g, '\\,')
+                    .replace(/\n/g, '\\n')
+                    .replace(/\r/g, '');
+            };
+
+            const uid = `stagelog-${performance.id}-${Date.now()}-${index}@stagelog`;
+
+            const event = [
+                'BEGIN:VEVENT',
+                `UID:${uid}`,
+                `DTSTAMP:${formatDateForICS(new Date())}`,
+                `DTSTART:${formatDateForICS(startTime)}`,
+                `DTEND:${formatDateForICS(endTime)}`,
+                `SUMMARY:${escapeICS(showTitle)}`,
+                `LOCATION:${escapeICS(locationString)}`,
+                `DESCRIPTION:${escapeICS(description)}`,
+                'STATUS:CONFIRMED',
+                'SEQUENCE:0',
+                'END:VEVENT'
+            ].join('\r\n') + '\r\n';
+
+            icsContent += event;
+        });
+
+        icsContent += 'END:VCALENDAR\r\n';
+
+        // Create and download the file
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `stagelog-performances-${new Date().toISOString().split('T')[0]}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showFeedback('calendar-export-feedback', `Successfully exported ${validPerformances.length} performance(s) to calendar file!`, 'success');
+    } catch (error) {
+        console.error('Error exporting to calendar:', error);
+        showFeedback('calendar-export-feedback', 'Export failed: ' + error.message, 'error');
     }
 }
 

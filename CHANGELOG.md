@@ -5,6 +5,47 @@ All notable changes to StageLog will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2025-11-08
+
+### Added
+- **Google Maps Places Integration**: Automatic location autocomplete for theatres with Google Maps Places API
+- **Location Autofill**: City automatically populated from Google Maps selection
+- **Google Calendar Integration**: Add individual performances to Google Calendar with one click
+- **Bulk Calendar Export**: Export all performances with valid dates/times as ICS file for Google Calendar import
+- **Required Time Field**: Time is now mandatory for all performances (except Pro Shots)
+- **Time Slot Badges**: Automatic matinee/evening classification based on performance time
+- **Enhanced Show Search**: Integration with Wikidata and Ovrtur.com for comprehensive show database
+- **Location Backfill Tool**: Admin tool to enrich existing performances with Google Places data
+- **Pro Shot Location Handling**: Google Maps disabled automatically for Pro Shot performances
+
+### Changed
+- **Show Search**: Replaced limited local database with dynamic external API searches (Wikidata, Ovrtur)
+- **Performance Cards**: Now display time, time slot badges, and calendar buttons
+- **Add Performance Form**: Enhanced with Google Maps autocomplete and mandatory time field
+- **Location Data**: Stored with place IDs, formatted addresses, and coordinates
+
+### Fixed
+- **Version Numbering**: Updated to v2.8.0 to reflect feature additions
+- **API Key Security**: All API keys now use placeholders (REPLACE_WITH_YOUR_*_API_KEY)
+
+## [2.7.0] - 2025-10-01
+
+### Added
+- **Enhanced Analytics System**: Completely redesigned analytics with modern UI
+- **Pro Shot Separation**: Pro Shots tracked separately from live performances
+- **Accurate Spending Stats**: Live theatre costs calculated independently (no Pro Shot contamination)
+- **Legacy Analytics Deprecation**: Warning banner on old analytics page
+
+### Changed
+- **Navigation**: Renamed "Enhanced Analytics" to "Analytics" and "Analytics" to "Legacy Analytics"
+- **Spending Calculations**: Pro Shots completely excluded from spending analytics
+- **Rating Distribution**: Standardized CSS classes across legacy and enhanced analytics
+
+### Fixed
+- **Rating Distribution Display**: Fixed empty rating distribution on legacy analytics page
+- **Navigation Errors**: Fixed `window.app.loadMyShows is not a function` error
+- **Stats System**: Fixed `calculateRatingStats()` to return proper structure even with no ratings
+
 ## [2.5.0] - 2024-09-03
 
 ### Added

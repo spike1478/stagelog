@@ -50,3 +50,13 @@ npm-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# API keys and secrets (should never be committed)
+*api-key*
+*secret*
+*password*
+
+# Build artifacts and temporary files
+cleanup-files/
+dist/
+*.backup

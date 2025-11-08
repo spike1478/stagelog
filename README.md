@@ -4,19 +4,22 @@ A web app for tracking theatre shows because why not? Built with vanilla HTML, C
 
 > **TL;DR**: Made this for me and my partner to track our theatre shows because I thought it would be fun. Threw it on GitHub in case anyone else wants to mess around with it. Use it, break it, improve it, or completely ignore it - whatever floats your boat! 🎭✨
 
-**Current Version:** v2.7.0 - Enhanced Analytics & Pro Shot Features
+**Current Version:** v2.8.0 - Google Maps Integration & Calendar Export
 
-> **Latest Update:** Added completely redesigned analytics system with Pro Shot separation, fixed critical bugs with future performance ratings and spending calculations, and improved navigation system!
+> **Latest Update:** Added Google Maps Places autocomplete for locations, Google Calendar integration (individual & bulk export), required time field, enhanced show search with Wikidata/Ovrtur, and location backfill tools!
 
 
 
 ## ✨ What It Does (Because Apparently We Need Features)
 
 ### 🎪 Performance Tracking
-- **Add Shows**: Because remembering what you saw is hard
+- **Add Shows**: Smart show search with Wikidata and Ovrtur.com integration - no more limited database!
 - **Rate Everything**: Multi-dimensional rating system with weighted scoring
 - **Musical vs Non-Musical**: Smart rating system that adapts based on show type
 - **Track Spending**: Because theatre is expensive and we need to know just how broke we are
+- **Location Tracking**: Google Maps Places autocomplete for accurate theatre locations
+- **Time Management**: Required time field with automatic matinee/evening classification
+- **Calendar Integration**: Add performances to Google Calendar individually or export all at once
 - **Pro Shot Magic**: Special handling for when you watch recordings instead of going out
 - **Edit Ratings**: Update your ratings anytime - no more being stuck with first impressions!
 
@@ -34,6 +37,8 @@ A web app for tracking theatre shows because why not? Built with vanilla HTML, C
 ### 🎨 User Experience (Because We're Not Monsters)
 - **Dark/Light Mode**: Because staring at bright screens at 2am is painful
 - **Responsive Design**: Works on your phone, tablet, laptop, or whatever device you're using
+- **Location Autocomplete**: Google Maps integration for easy theatre and city selection
+- **Calendar Export**: Export all performances to Google Calendar with one click (ICS format)
 - **Accessibility**: Because everyone should be able to track their theatre addiction
 - **Data Export**: Export your data so you don't lose your theatre history
 
@@ -75,6 +80,45 @@ php -S localhost:8000
 ```
 
 Then open `http://localhost:8000` in your browser.
+
+## 🗺️ Google Maps Setup (Optional - For Location Autocomplete)
+
+StageLog can use Google Maps Places API for automatic location autocomplete. This is optional but highly recommended for accurate location data.
+
+### Getting a Google Maps API Key
+
+1. **Go to Google Cloud Console**: [https://console.cloud.google.com/](https://console.cloud.google.com/)
+2. **Create or Select a Project**: Create a new project or select an existing one
+3. **Enable APIs**: Enable the following APIs in "APIs & Services" → "Library":
+   - **Places API (New)** - Required for location autocomplete
+   - **Maps JavaScript API** - Required for Maps functionality
+4. **Create API Key**: Go to "APIs & Services" → "Credentials" → "Create Credentials" → "API Key"
+5. **Restrict Your API Key** (Recommended):
+   - Click on your API key to edit it
+   - Under "Application restrictions", add your domains:
+     - `http://localhost/*` (for local development)
+     - `http://127.0.0.1/*` (for local development)
+     - `https://yourdomain.com/*` (for production)
+   - Under "API restrictions", select "Restrict key" and choose:
+     - Places API (New)
+     - Maps JavaScript API
+   - Save your changes
+
+### Adding the API Key to StageLog
+
+1. Open `app-fixed.js` in your StageLog folder
+2. Find the `loadGoogleMapsScript` function (around line 3485)
+3. Replace `'REPLACE_WITH_YOUR_MAPS_API_KEY'` with your actual API key:
+   ```javascript
+   const key = 'YOUR_ACTUAL_API_KEY_HERE';
+   ```
+
+### For the Backfill Tool
+
+If you want to use the location backfill tool (`tools/backfill-places.html`), also update:
+- `tools/backfill-places.html` - Replace `REPLACE_WITH_YOUR_MAPS_API_KEY` in all locations
+
+**⚠️ Security Note**: Never commit API keys to version control. For production deployments, use environment variables or secure configuration management.
 
 ## 🔥 Firebase Setup (Optional - For Device Sync)
 
@@ -201,11 +245,15 @@ The app works out of the box with the included Firebase configuration. Your data
 
 ### Adding a Performance
 1. Click "Add Performance" in the navigation
-2. Fill in the show details (title, venue, date, etc.)
-3. Select production type and whether it's a musical
-4. Rate the performance across different categories (system adapts based on show type)
-5. Add expense information (optional)
-6. Save your performance
+2. **Search for a Show**: Start typing the show name - searches Wikidata and Ovrtur.com automatically
+3. Fill in the performance details:
+   - **Theatre Name**: Use Google Maps autocomplete for accurate location
+   - **City**: Automatically filled from Google Maps selection
+   - **Date & Time**: Date and time are required (except for Pro Shots)
+4. Select production type and whether it's a musical
+5. Rate the performance across different categories (system adapts based on show type)
+6. Add expense information (optional)
+7. Save your performance
 
 ### Rating System
 - **Musicals**: Music/Songs, Performance/Cast, Stage/Visuals, Story/Plot, Theatre Experience, Programme, Atmosphere
@@ -221,6 +269,7 @@ The app works out of the box with the included Firebase configuration. Your data
 
 ### Managing Data
 - **Export**: Use the export buttons in Analytics to backup your data
+- **Calendar Export**: Export all performances to Google Calendar (ICS format) from Settings
 - **Import**: Use the Import JSON feature to restore from backup
 - **Filter**: Use the search and filter options to find specific performances
 
@@ -256,6 +305,10 @@ stagelog/
 ├── musical-database.js     # Musical database and show data
 ├── restore-functions.js    # Data restore and backup functions
 ├── init-code.js            # Initialization code
+├── tools/                  # Admin and utility tools
+│   ├── backfill-places.html  # Location backfill tool (Google Places)
+│   ├── backfill-places.js    # Backfill tool logic
+│   └── places-resolver.js    # Google Places API resolver
 ├── docker-compose.yml      # Docker container setup
 ├── nginx.conf              # Nginx configuration
 ├── favicon.svg             # Site icon
@@ -328,5 +381,5 @@ This project was built with AI assistance because we're not coding gods. For ful
 
 **Made with ❤️ for theatre lovers everywhere**
 
-*StageLog v2.7.0 - Track your theatre journey, one performance at a time.*  
-*Last updated: October 1, 2025*
+*StageLog v2.8.0 - Track your theatre journey, one performance at a time.*  
+*Last updated: November 8, 2025*

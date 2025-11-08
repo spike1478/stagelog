@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StageLog - Theatre Performance Tracker</title>
-    <link rel="stylesheet" href="styles.css?v=2.6.3">
+    <link rel="stylesheet" href="styles.css?v=2.8.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -206,6 +206,15 @@
                             <div class="input-with-help">
                                 <input type="date" id="date-seen" required aria-label="Performance date. Press Alt+Down arrow to open date picker, use arrow keys to navigate, Enter to select.">
                                 <button type="button" class="help-icon" title="Keyboard shortcuts: Alt+Down to open date picker, arrow keys to navigate, Enter to select" aria-label="Date picker keyboard help">
+                                    <i class="fas fa-question-circle" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="time-seen">Time *</label>
+                            <div class="input-with-help">
+                                <input type="time" id="time-seen" required aria-label="Performance time in 24-hour format">
+                                <button type="button" class="help-icon" title="Enter performance start time (optional). Used to classify Matinee or Evening." aria-label="Time input help">
                                     <i class="fas fa-question-circle" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -1280,6 +1289,22 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="setting-card">
+                            <div class="setting-icon">
+                                <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                            </div>
+                            <div class="setting-content">
+                                <h4>Export to Google Calendar</h4>
+                                <p>Export all performances with valid dates and times as an ICS file for Google Calendar</p>
+                                <div class="setting-actions">
+                                    <button class="btn btn-primary" onclick="exportAllToCalendar()" title="Export all performances to Google Calendar">
+                                        <i class="fas fa-calendar-plus" aria-hidden="true"></i> Export to Calendar
+                                    </button>
+                                    <div class="action-feedback" id="calendar-export-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -1462,17 +1487,17 @@
         </div>
     </div>
 
-    <script src="database.js?v=2.6.3"></script>
-    <script src="api.js?v=2.6.3"></script>
-    <script src="csv-import.js?v=2.6.3"></script>
-    <script src="import-performances.js?v=2.6.3"></script>
-    <script src="musical-database.js?v=2.6.3"></script>
-    <script src="restore-functions.js?v=2.6.3"></script>
-    <script src="stats-system.js?v=2.6.3"></script>
-    <script src="analytics-functions.js?v=2.6.3"></script>
-    <script src="firebase-sync.js?v=2.6.3"></script>
-    <script src="app-fixed.js?v=2.6.3"></script>
-    <script src="enhanced-analytics-functions.js?v=2.6.3"></script>
-    <script src="init-code.js?v=2.6.3"></script>
+    <script src="database.js?v=2.8.0"></script>
+    <script src="api.js?v=2.8.0"></script>
+    <script src="csv-import.js?v=2.8.0"></script>
+    <script src="import-performances.js?v=2.8.0"></script>
+    <script src="musical-database.js?v=2.8.0"></script>
+    <script src="restore-functions.js?v=2.8.0"></script>
+    <script src="stats-system.js?v=2.8.0"></script>
+    <script src="analytics-functions.js?v=2.8.0"></script>
+    <script src="firebase-sync.js?v=2.8.0"></script>
+    <script src="app-fixed.js?v=2.8.0"></script>
+    <script src="enhanced-analytics-functions.js?v=2.8.0"></script>
+    <script src="init-code.js?v=2.8.0"></script>
 </body>
 </html>
