@@ -18,7 +18,7 @@ We actively maintain security for the following versions of StageLog:
 
 ### **How to Report:**
 
-1. **Email:** Send details to [security@mayamccutcheon.com] (replace with your actual email)
+1. **Email:** Send details to [security@mayamccutcheon.com]
 2. **Subject Line:** Use format: `[SECURITY] StageLog v[version] - [brief description]`
 3. **Include:**
    - Version of StageLog affected
